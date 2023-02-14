@@ -35,3 +35,12 @@ Now you can run application:
 ```
 npm run dev
 ```
+
+# Article
+If you'd rather read than watch... I also prepared text version.
+
+## Intro
+I have seen many tutorials and articles about social login in Node.js, and most of them don't cover the actual integration with the database. This article is not a typical tutorial. I just want to discuss the tricky parts of social authentication. We will discuss possible database schemas and common mistakes I have observed in other people's code. If you are struggling with a similar problem, I hope you will find this text helpful.
+
+## OAuth 2.0 standard
+We cannot discuss social authentication without mentioning the OAuth 2 standard.

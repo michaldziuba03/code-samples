@@ -1,2 +1,2 @@
-# samples
-Sample projects from my YouTube videos
+## Samples
+Sample projects from my YouTube videos.

@@ -43,4 +43,12 @@ If you'd rather read than watch... I also prepared text version.
 I have seen many tutorials and articles about social login in Node.js, and most of them don't cover the actual integration with the database. This article is not a typical tutorial. I just want to discuss the tricky parts of social authentication. We will discuss possible database schemas and common mistakes I have observed in other people's code. If you are struggling with a similar problem, I hope you will find this text helpful.
 
 ## OAuth 2.0 standard
-We cannot discuss social authentication without mentioning the OAuth 2 standard.
+We cannot discuss social authentication without mentioning the OAuth 2 standard. This standard is a core of most Passport.js strategies, so I think it's important to understand at least the data flow.
+
+### OAuth 2.0 flow example (simplified)
+1. User clicks `Continue with GitHub` button.
+2. Button redirects user to GitHub authorization page.
+3. After successful authorization, GitHub redirects user back to our application (to callback endpoint) and send `code` in query params.
+4. Our application exchange `code` value for access token by sending code, client id and client secret to GitHub servers.
+5. Our application sends an authorized request (with obtained access token) to the GitHub API and retrieves the profile of authorized user.
+6. Now we can use that profile data to login or register new account in our system.

@@ -64,6 +64,12 @@ I have seen many tutorials and articles about social login in Node.js, and most 
 
 > This article DOESN'T pretend to show you best practices - text is based on my own opinions and thoughts.
 
+Article assumes you know:
+1. Express.js and Node.js ecosystem
+2. Passport.js
+3. TypeScript
+4. HTTP Protocol
+
 ## Passport.js
 Now let's talk a little bit about the most popular auth middleware for Node.js - PassportJS. I found using this library in a modern TypeScript stack to be a bit of a pain for me. Passport just feels a little bit outdated.
 

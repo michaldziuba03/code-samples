@@ -42,7 +42,7 @@ If you'd rather read than watch... I also prepared text version.
 ## Intro
 I have seen many tutorials and articles about social login in Node.js, and most of them don't cover the actual integration with the database. This article is not a typical tutorial. I just want to discuss the tricky parts of social authentication, possible database schemas and common mistakes I have observed in other people's code. If you are struggling with a similar problem, I hope you will find this text helpful.
 
-> This article does not pretend to show you best practices - text is based on my own opinions and thoughts.
+> This article DOESN'T pretend to show you best practices - text is based on my own opinions and thoughts.
 
 ## Passport.js
 Now let's talk a little bit about the most popular auth middleware for Node.js - PassportJS. I found using this library in a modern TypeScript stack to be a bit of a pain for me. Passport just feels a little bit outdated.
@@ -56,7 +56,7 @@ What scares me the most is development activity in PassportJS. According to the 
 </p>
 
 ### TypeScript problems
-Some types are just incorrect. Here is example - `profile.emails[0].verified` is actually BOOLEAN, but is typed as string literal.
+Some types are just incorrect. Here is an example - `profile.emails[0].verified` is actually BOOLEAN, but is typed as string literal.
 
 <img width="600" src="https://user-images.githubusercontent.com/43048524/218768285-762e287a-18b9-476f-a700-2214d49813ba.png" />
 

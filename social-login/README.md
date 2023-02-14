@@ -54,7 +54,7 @@ If you'd rather read than watch... I also prepared text version.
     </li>
     <li>
       <a href="#oauth-20-standard">OAuth 2.0 standard</a>
-      <ul><li><a href="#oauth-20-flow-example-simplified">OAuth 2.0 flow example (simplified)</a></li></ul>
+      <ul><li><a href="#oauth-20-authorization-code-flow-example">OAuth 2.0 Authorization Code Flow example</a></li></ul>
     </li>
   </ol>
 </details>
@@ -64,7 +64,7 @@ I have seen many tutorials and articles about social login in Node.js, and most 
 
 > This article DOESN'T pretend to show you best practices - text is based on my own opinions and thoughts.
 
-Article assumes you know:
+Article assumes you are more advanced and you at least know:
 1. Express.js and Node.js ecosystem
 2. Passport.js
 3. TypeScript
@@ -92,16 +92,17 @@ I found that option exists by reading a source code of strategy...
 
 
 ## OAuth 2.0 standard
-We cannot discuss social authentication without mentioning the OAuth 2.0 standard. This standard is a core of most Passport.js strategies, so I think it's important to understand at least the data flow.
+We cannot discuss social authentication without mentioning the OAuth 2.0 standard. This standard is a core of most Passport.js strategies, so I think it's important to understand at least the data flow. Most Passport.js strategies use `Authorization Code Flow`, because this flow is suited for a regular server applications.
 
 
-### OAuth 2.0 flow example (simplified)
-Most Passport.js strategies use `Authorization Code Flow`, because this flow is suited for a regular server applications.
+### OAuth 2.0 Authorization Code Flow example
 1. User clicks `Continue with GitHub` button.
 2. Button redirects user to GitHub authorization page.
-4. After successful authorization, GitHub redirects user back to our application (to callback endpoint) and send `code` in query params.
+4. After successful authorization, GitHub redirects user back to our application (to callback endpoint) and sends `code` in query params.
 5. Our application exchange `code` value for access token by sending code, client id and client secret to GitHub servers.
 6. Our application sends an authorized request (with obtained access token) to the GitHub API and retrieves the profile of authorized user.
 7. Now we can use that profile data to login or register new account in our system.
 
 
+## Social login implementation overview
+Now let's get to the right part of article. We will be talking about the moment when you get the user's profile in the Passport.js strategy callback.

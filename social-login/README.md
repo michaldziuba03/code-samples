@@ -116,8 +116,33 @@ The first method is fairly simple. User can use only one authentication method f
 ### Second method - user can login with multiple providers
 The second is more complex and requires 2 entities. User can link multiple authentication providers (connected to the same email address) to a single account.
 
+#### Relational databases
 ![image](https://user-images.githubusercontent.com/43048524/219093100-36628861-ea9f-4dc7-bf49-862a1a4275fd.png)
 > Entity diagram generated with [dbdiagram.io](https://dbdiagram.io/)
+
+#### MongoDB
+MongoDB schema is more flexible. Example schemas for `users` collection:
+```json
+{
+  "_id": <ObjectId>,
+  "name": "John Doe",
+  "email": "johndoe@gmail.com",
+  "googleId": "142984872137006300000",
+  "githubId": "42580000"
+}
+```
+```json
+{
+  "_id": <ObjectId>,
+  "name": "John Doe",
+  "email": "johndoe@gmail.com",
+  "accounts": [
+    { "provider": "google", "subject": "142984872137006300000" },
+    { "provider": "github", "subject": "42580000" }
+  ]
+}
+```
+
 
 ### Third method - user can login with multiple providers BUT needs to verify email if account already exists
 ![image](https://user-images.githubusercontent.com/43048524/219123088-7c755fb8-a87a-47b6-b6ae-70928ee51acf.png)

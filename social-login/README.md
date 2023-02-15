@@ -110,8 +110,22 @@ Now let's get to the right part of article. We will be talking about the moment 
 ### First method - user can login with ONLY one provider
 The first method is fairly simple. User can use only one authentication method for specific email. That means you cannot link your Google account if you registered with email and password method (let's call it `local` provider/strategy) previously .
 
+#### Relational databases
 ![image](https://user-images.githubusercontent.com/43048524/219104514-2b36ebce-b303-4026-b858-1119d5f62919.png)
 > Entity diagram generated with [dbdiagram.io](https://dbdiagram.io/)
+
+#### MongoDB
+For MongoDB schema is the same:
+```json
+{
+  "_id": <ObjectId>,
+  "name": "John Doe",
+  "email": "johndoe@gmail.com",
+  "password": null,
+  "provider": "github",
+  "providerId": "42580000"
+}
+```
 
 ### Second method - user can login with multiple providers
 The second is more complex and requires 2 entities. User can link multiple authentication providers (connected to the same email address) to a single account.
@@ -121,12 +135,13 @@ The second is more complex and requires 2 entities. User can link multiple authe
 > Entity diagram generated with [dbdiagram.io](https://dbdiagram.io/)
 
 #### MongoDB
-MongoDB schema is more flexible. Example schemas for `users` collection:
+MongoDB schema is more flexible and there is no reason to normalize data (you probably shouldn't create additional collection to store federated accounts, just store them in user document). Example schemas for `users` collection:
 ```json
 {
   "_id": <ObjectId>,
   "name": "John Doe",
   "email": "johndoe@gmail.com",
+  "password": null,
   "googleId": "142984872137006300000",
   "githubId": "42580000"
 }
@@ -136,6 +151,7 @@ MongoDB schema is more flexible. Example schemas for `users` collection:
   "_id": <ObjectId>,
   "name": "John Doe",
   "email": "johndoe@gmail.com",
+  "password": null,
   "accounts": [
     { "provider": "google", "subject": "142984872137006300000" },
     { "provider": "github", "subject": "42580000" }

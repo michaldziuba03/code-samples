@@ -105,13 +105,17 @@ We cannot discuss social authentication without mentioning the OAuth 2.0 standar
 
 
 ## Social login implementation overview
-Now let's get to the right part of article. We will be talking about the moment when you get the user's profile in the Passport.js strategy callback. During my little research, I have observed at least 3 social authentication flows.
+Now let's get to the right part of article. We will be talking about the moment when you get the user's profile in the Passport.js strategy callback. During my little research, I have observed at least 3 ways to implement social authentication.
 
 ### First method - user can login with ONLY one provider
+The first method is fairly simple. User can use only one authentication method for specific email. That means you cannot link your Google account if you registered with email and password method (let's call it `local` provider/strategy) previously .
+
 ![image](https://user-images.githubusercontent.com/43048524/219104514-2b36ebce-b303-4026-b858-1119d5f62919.png)
 > Entity diagram generated with [dbdiagram.io](https://dbdiagram.io/)
 
 ### Second method - user can login with multiple providers
+The second is more complex and requires 2 entities. User can link multiple authentication providers (connected to the same email address) to a single account.
+
 ![image](https://user-images.githubusercontent.com/43048524/219093100-36628861-ea9f-4dc7-bf49-862a1a4275fd.png)
 > Entity diagram generated with [dbdiagram.io](https://dbdiagram.io/)
 

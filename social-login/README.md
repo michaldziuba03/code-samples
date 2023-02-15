@@ -106,3 +106,6 @@ We cannot discuss social authentication without mentioning the OAuth 2.0 standar
 
 ## Social login implementation overview
 Now let's get to the right part of article. We will be talking about the moment when you get the user's profile in the Passport.js strategy callback.
+
+![image](https://user-images.githubusercontent.com/43048524/219093100-36628861-ea9f-4dc7-bf49-862a1a4275fd.png)
+> Entity diagram generated with [dbdiagram.io](https://dbdiagram.io/)

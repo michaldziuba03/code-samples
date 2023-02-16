@@ -110,12 +110,17 @@ Now let's get to the right part of article. We will be talking about the moment 
 ### Some universal rules
 Before we will discuss each social auth implementation, I want to talk about some universal rules that apply to any method:
 
-1. Email address is not reliable for existing account lookup. In my implementations I use emails only for linking new social provider to existing account OR creating new account. Why email address from social provider is not reliable? Because in some providers you can CHANGE email address and in some implementation I have seen, you will end up with new account in that case :)
+1. Email address is not reliable for existing account lookup - use social account's unique id instead. In my implementations I use emails only for linking new social provider to existing account OR creating new account. Why email address from social provider is not reliable? Because in some providers you can CHANGE email address and in some implementation I have seen, you will end up with new account in that case :)
 
 2. Email address from social provider must be verified. It's very important if you want to link new social provider to existing account. Why? Because some bad actor can find out that specific email is registered in your application and create new account with that email for example on Google. Bad actor doesn't have access to that email but control Google account with that email. He can use that unverified Google account to get access to legitimate account from your application. 
 
+3. Some providers actually may not return email address. In some providers user can register with phone number - keep that fact in mind. Some possible solutions:
+- simply deny social accounts without email address
+- prompt user to provide manually email address
+- save that phone number as email in your database (you may add additional flag like `hasEmail: false` or something like that).
+
 ### First method - user can login with ONLY one provider
-The first method is fairly simple. User can use only one authentication method for specific email. That means you cannot link your Google account if you registered with email and password method (let's call it `local` provider/strategy) previously .
+The first method is fairly simple. User can use only one authentication method for specific email. That means you cannot link your Google account if you registered with email and password method previously.
 
 #### Relational databases
 ![image](https://user-images.githubusercontent.com/43048524/219104514-2b36ebce-b303-4026-b858-1119d5f62919.png)
@@ -133,6 +138,12 @@ For MongoDB schema is the same:
   "providerId": "42580000"
 }
 ```
+
+#### Pros:
+- easiest to implement
+
+#### Cons:
+- bad user experience - most people expects your application to link their social accounts connected to the same email address
 
 ### Second method - user can login with multiple providers
 The second is more complex and requires 2 entities. User can link multiple authentication providers (connected to the same email address) to a single account.
@@ -169,6 +180,23 @@ MongoDB schema is more flexible and there is no reason to normalize data (you pr
 ```
 > This schema is more generic and you can use same query for each social auth provider. I think you can create unique compound index for `accounts.provider` and `accounts.subject`.
 
+#### Pros:
+- good user experience - their social accounts will be automatically linked to existing account with the same email.
+
+#### Cons:
+- more complex
+- you put the trust to the 3rd party providers they verified email
+
 ### Third method - user can login with multiple providers BUT needs to verify email if account already exists
+The last featured method is actually extended version of 2nd method. Let's assume you don't want to trust 3rd parties if they verified email - you want to verify on your own.
+
+#### Relational databases
 ![image](https://user-images.githubusercontent.com/43048524/219123088-7c755fb8-a87a-47b6-b6ae-70928ee51acf.png)
 > Entity diagram generated with [dbdiagram.io](https://dbdiagram.io/)
+
+#### Pros:
+- balanced user experience and security - their social accounts will be automatically linked to existing account with the same email BUT they have to login to the email and click the verification link.
+- you can verify on your own if user actually controls that email address
+
+#### Cons:
+- most complex and actually not that easy to implement correctly

@@ -107,6 +107,13 @@ We cannot discuss social authentication without mentioning the OAuth 2.0 standar
 ## Social login implementation overview
 Now let's get to the right part of article. We will be talking about the moment when you get the user's profile in the Passport.js strategy callback. During my little research, I have observed at least 3 ways to implement social authentication.
 
+### Some universal rules
+Before we will discuss each social auth implementation, I want to talk about some universal rules that apply to any method:
+
+1. Email address is not reliable for existing account lookup. In my implementations I use emails only for linking new social provider to existing account OR creating new account. Why email address from social provider is not reliable? Because in some providers you can CHANGE email address and in some implementation I have seen, you will end up with new account in that case :)
+
+2. Email address from social provider must be verified. It's very important if you want to link new social provider to existing account. Why? Because some bad actor can find out that specific email is registered in your application and create new account with that email for example on Google. Bad actor doesn't have access to that email but control Google account with that email. He can use that unverified Google account to get access to legitimate account from your application. 
+
 ### First method - user can login with ONLY one provider
 The first method is fairly simple. User can use only one authentication method for specific email. That means you cannot link your Google account if you registered with email and password method (let's call it `local` provider/strategy) previously .
 

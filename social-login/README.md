@@ -107,7 +107,7 @@ We cannot discuss social authentication without mentioning the OAuth 2.0 standar
 ## Social login implementation overview
 Now let's get to the right part of article. We will be talking about the moment when you get the user's profile in the Passport.js strategy callback. During my little research, I have observed at least 3 ways to implement social authentication.
 
-### Some universal rules
+### Some universal rules and common gotchas
 Before we will discuss each social auth implementation, I want to talk about some universal rules that apply to any method:
 
 1. Email address is not reliable for existing account lookup - use social account's unique id instead. In my implementations I use emails only for linking new social provider to existing account OR creating new account. Why email address from social provider is not reliable? Because in some providers you can CHANGE email address and in some implementation I have seen, you will end up with new account in that case :)

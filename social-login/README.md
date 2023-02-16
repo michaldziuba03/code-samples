@@ -136,6 +136,7 @@ The second is more complex and requires 2 entities. User can link multiple authe
 
 #### MongoDB
 MongoDB schema is more flexible and there is no reason to normalize data (you probably shouldn't create additional collection to store federated accounts, just store them in user document). Example schemas for `users` collection:
+
 ```json
 {
   "_id": <ObjectId>,
@@ -146,6 +147,7 @@ MongoDB schema is more flexible and there is no reason to normalize data (you pr
   "githubId": "42580000"
 }
 ```
+> This is the simplest schema you can apply with unique sparse indexes for `googleId` and `githubId`. The biggest disadvantage is that you have to create a separate query for each provider.
 ```json
 {
   "_id": <ObjectId>,
@@ -158,7 +160,7 @@ MongoDB schema is more flexible and there is no reason to normalize data (you pr
   ]
 }
 ```
-
+> This schema is more generic and you can use same query for each social auth provider. I think you can create unique compound index for `accounts.provider` and `accounts.subject`.
 
 ### Third method - user can login with multiple providers BUT needs to verify email if account already exists
 ![image](https://user-images.githubusercontent.com/43048524/219123088-7c755fb8-a87a-47b6-b6ae-70928ee51acf.png)

@@ -180,6 +180,40 @@ MongoDB schema is more flexible and there is no reason to normalize data (you pr
 ```
 > This schema is more generic and you can use same query for each social auth provider. I think you can create unique compound index for `accounts.provider` and `accounts.subject`.
 
+#### Example flow
+I gonna use SQL statements to explain flow. Imagine you are writing Google strategy verification callback and you got object like: 
+```js
+{
+  provider: 'google',
+  id: '142984872137006300000',
+  displayName: 'John Doe',
+  emails: [{ value: 'johndoe@gmail.com', verified: true }],
+  ...
+}
+```
+1. Check if social account is already linked with query like:
+```sql
+SELECT * FROM federated_accounts WHERE provider='google' AND subject='142984872137006300000';
+```
+2. If federated account found then just create session/JWT by using `federated_accounts.user_id` field.
+3. If federated account does not exists, that means we have to check if user with email from social provider exists in database with query like:
+```sql
+SELECT * FROM users WHERE email='johndoe@gmail.com';
+```
+4. If user with that email exists (for example id is `20`) that means we want to just link another social provider, so create federated account with insert:
+```sql
+INSERT INTO federated_accounts (provider, subject, user_id) VALUES ('google', '142984872137006300000', 20);
+```
+5. After successful insert you can create session/JWT for a user with id=20.
+6. If user with that email does not exist, create brand new user and link social provider. I think you should run that query in transaction:
+```sql
+BEGIN;
+  INSERT INTO users (name, email) VALUES ('John Doe', 'johndoe@gmail.com') RETURNING id; ---> id returns 21
+  INSERT INTO federated_accounts (provider, subject, user_id) VALUES ('google', '142984872137006300000', 21);
+COMMIT; ---> or ROLLBACK; in case of error
+```
+7. After successful transaction you can create session/JWT for that created user with id=21.
+
 #### Pros:
 - good user experience - their social accounts will be automatically linked to existing account with the same email.
 

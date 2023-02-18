@@ -140,7 +140,7 @@ For MongoDB schema is the same:
 ```
 
 #### Example flow
-
+I will briefly explain this method, because in this article we will focus actually on second method.
 1. Find user by provider and social account id
 2. If user already exists - create session/JWT
 3. If user doesn't exists - create new one using profile data from social provider (email, social account id, displayName). Make sure email is not already taken.
@@ -152,7 +152,7 @@ For MongoDB schema is the same:
 - bad user experience - most people expects your application to link their social accounts connected to the same email address
 
 ### Second method - user can login with multiple providers
-The second is more complex and requires 2 entities. User can link multiple authentication providers (connected to the same email address) to a single account.
+The second method is most common implementation but is also more complex and requires 2 entities. User can link multiple authentication providers (connected to the same email address) to a single account.
 
 #### Relational databases
 ![image](https://user-images.githubusercontent.com/43048524/219093100-36628861-ea9f-4dc7-bf49-862a1a4275fd.png)
@@ -231,8 +231,15 @@ COMMIT; ---> or ROLLBACK; in case of error
 The last featured method is actually extended version of 2nd method. Let's assume you don't want to trust 3rd parties if they verified email - you want to verify on your own.
 
 #### Relational databases
-![image](https://user-images.githubusercontent.com/43048524/219123088-7c755fb8-a87a-47b6-b6ae-70928ee51acf.png)
+![image](https://user-images.githubusercontent.com/43048524/219873324-49863fc4-624c-44b1-924f-d2b9911ceb13.png)
 > Entity diagram generated with [dbdiagram.io](https://dbdiagram.io/)
+
+#### Example flow
+Flow is actually very similar to second method. The only difference is how you create `federated_accounts` entry. You actually create `federated_accounts` after email verification.
+
+So if user tries to link new social provider to existing account - you generate unique token, save entry with user's data in `staged_accounts` and send email to the user. For additional security you can hash that verification token with `sha256` before inserting to database, but to the verification link you put plain token. In email verification handler, you basically take than plain token, hash token and check if already exists in database (sha256 cannot be reversed btw).
+
+When user clicks verification link - you link social provider account. Now user can just use that social provider to login to their account.
 
 #### Pros:
 - balanced user experience and security - their social accounts will be automatically linked to existing account with the same email BUT they have to login to the email and click the verification link.

@@ -139,6 +139,12 @@ For MongoDB schema is the same:
 }
 ```
 
+#### Example flow
+
+1. Find user by provider and social account id
+2. If user already exists - create session/JWT
+3. If user doesn't exists - create new one using profile data from social provider (email, social account id, displayName). Make sure email is not already taken.
+
 #### Pros:
 - easiest to implement
 

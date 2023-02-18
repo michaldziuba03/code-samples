@@ -56,6 +56,15 @@ If you'd rather read than watch... I also prepared text version.
       <a href="#oauth-20-standard">OAuth 2.0 standard</a>
       <ul><li><a href="#oauth-20-authorization-code-flow-example">OAuth 2.0 Authorization Code Flow example</a></li></ul>
     </li>
+    <li>
+      <a href="#social-login-implementation-overview">Social login implementation overview</a>
+      <ul>
+        <li><a href="#some-universal-rules-and-common-gotchas">Some universal rules and common gotchas</a></li>
+        <li><a href="#first-method---user-can-login-with-only-one-provider">First method</a></li>
+        <li><a href="#second-method---user-can-login-with-multiple-providers">Second method</a></li>
+        <li><a href="#third-method---user-can-login-with-multiple-providers-but-needs-to-verify-email-if-account-already-exists">Third method</a></li>
+      </ul>
+    </li>
   </ol>
 </details>
 
@@ -237,9 +246,10 @@ The last featured method is actually extended version of 2nd method. Let's assum
 #### Example flow
 Flow is actually very similar to second method. The only difference is how you create `federated_accounts` entry. You actually create `federated_accounts` after email verification.
 
-So if user tries to link new social provider to existing account - you generate unique token, save entry with user's data in `staged_accounts` and send email to the user. For additional security you can hash that verification token with `sha256` before inserting to database, but to the verification link you put plain token. In email verification handler, you basically take than plain token, hash token and check if already exists in database (sha256 cannot be reversed btw).
+So if user tries to link new social provider to existing account - you generate unique token, save entry with user's data in `staged_accounts` and send email to the user. For additional security you can hash that verification token with `sha256` before inserting to database, but to the verification link you put plain token.
 
-When user clicks verification link - you link social provider account. Now user can just use that social provider to login to their account.
+When user clicks verification link -  you basically take than plain token, hash token and check if `staged_account` with that token already exist in database.
+If exists you link new social provider account. Now user can just use that social provider to login to their account.
 
 #### Pros:
 - balanced user experience and security - their social accounts will be automatically linked to existing account with the same email BUT they have to login to the email and click the verification link.

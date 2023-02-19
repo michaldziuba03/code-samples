@@ -5,6 +5,7 @@
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc",
+    "css:watch": "tailwindcss -i ./public/tailwind.css -o ./public/style.min.css --watch --minify",
     "dev": "ts-node-dev src/main.ts",
     "test": "jest"
   },
@@ -23,6 +24,7 @@
   "dependencies": {
     "argon2": "^0.30.3",
     "dotenv": "^16.0.3",
+    "ejs": "^3.1.8",
     "express": "^4.18.2",
     "express-flash": "^0.0.2",
     "express-session": "^1.17.3",
@@ -43,6 +45,9 @@
     "@types/passport-github2": "^1.2.5",
     "@types/passport-google-oauth20": "^2.0.11",
     "@types/passport-local": "^1.0.35",
+    "autoprefixer": "^10.4.13",
+    "postcss": "^8.4.21",
+    "tailwindcss": "^3.2.7",
     "ts-node-dev": "^2.0.0",
     "typescript": "^4.9.4"
   }

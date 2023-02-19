@@ -4,12 +4,16 @@ import express from 'express';
 import { setupPassport } from "./passport";
 import { authenticatedOnly, guestOnly } from "./middlewares";
 import { federatedAccountRepository, userRepository } from "./db";
-import argon2 from 'argon2';
 import { createGravatar } from "./utils";
+import argon2 from 'argon2';
+import flash from "express-flash";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
+app.set('view engine', 'ejs');
+app.use(flash());
 setupPassport(app);
 
 app.get('/me', authenticatedOnly, async (req, res) => {
@@ -30,17 +34,25 @@ app.get('/me', authenticatedOnly, async (req, res) => {
 });
 
 app.get('/auth/login', guestOnly, (req, res) => {
-   res.send('Login page');
+    const errors = req.flash('error') || [];
+    res.render('login', {
+        error: errors[0],
+    });
 });
 
 app.get('/auth/register', guestOnly, (req, res) => {
-    res.send('Register page');
+    const errors = req.flash('error') || [];
+    res.render('register', {
+        error: errors[0],
+    });
 });
 
 app.post('/auth/register', guestOnly, async (req, res) => {
    const { email, name, password } = req.body;
    const exists = await userRepository.exist({ where: { email } });
+   console.log(exists, req.body);
    if (exists) {
+       req.flash('error', ['User already exists']);
        return res.redirect('/auth/register');
    }
 

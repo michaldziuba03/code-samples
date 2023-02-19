@@ -40,10 +40,13 @@ export function setupPassport(app: Express) {
     app.get('/auth/google', guestOnly, passport.authenticate('google'));
     app.get('/auth/github', guestOnly, passport.authenticate('github'));
 
+    // @ts-ignore
     app.post('/auth/login', guestOnly, passport.authenticate('local', {
         session: true,
         successRedirect: '/me',
         failureRedirect: '/auth/login',
+        failureFlash: true,
+        badRequestMessage: 'Invalid email or password',
     }));
 
     app.get('/auth/google/callback', guestOnly, passport.authenticate('google', {

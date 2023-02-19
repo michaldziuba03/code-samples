@@ -1,5 +1,5 @@
-import { createHash } from "crypto";
-import {GithubEmail, GoogleEmail} from "./types";
+import { createHash } from 'crypto';
+import { GithubEmail, GoogleEmail } from './types';
 
 export function createGravatar(email: string) {
     const hash = createHash('md5').update(email).digest('hex');

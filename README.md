@@ -11,6 +11,6 @@ Single place for sample projects from my YouTube videos and articles.
 6. I also treat written guides as my personal (but public) notes
 
 ### Guides
-- [x] [Social login with Google and GitHub](https://github.com/michaldziuba03/samples/tree/main/social-login)
+- [x] [Social login with Google and GitHub](https://github.com/michaldziuba03/code-samples/tree/main/social-login)
 - [ ] Reset password
 - [ ] Generating link preview

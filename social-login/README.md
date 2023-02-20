@@ -488,3 +488,240 @@ app.get('/logout', authenticatedOnly, (req, res) => {
    return res.redirect('/auth/login');
 });
 ```
+
+### Passport setup
+In `passport.ts` I decided to put session configuration, standard passport configurations. I also added 3 strategies:
+- Google
+- GitHub
+- Local
+
+Still nothing special...
+
+> /setup/passport.ts
+```ts
+import passport from 'passport';
+import { Express } from 'express';
+import { googleStrategy } from '../strategies/google-strategy';
+import { githubStrategy } from '../strategies/github-strategy';
+import session from 'express-session';
+import { guestOnly } from './middlewares';
+import { localStrategy } from '../strategies/local-strategy';
+
+export function setupPassport(app: Express) {
+    app.use(session({
+        name: 'sid',
+        secret: process.env.SESSION_SECRET!,
+        resave: false,
+        saveUninitialized: false,
+    }));
+
+    app.use(passport.initialize());
+    app.use(passport.session());
+
+    passport.serializeUser(function(user, cb) {
+        return cb(null, user);
+    });
+
+    passport.deserializeUser(function(user: any, cb) {
+        return cb(null, user);
+    });
+
+    passport.use(localStrategy);
+    passport.use(googleStrategy);
+    passport.use(githubStrategy);
+
+    app.get('/auth/google', guestOnly, passport.authenticate('google'));
+    app.get('/auth/github', guestOnly, passport.authenticate('github'));
+
+    // @ts-ignore
+    app.post('/auth/login', guestOnly, passport.authenticate('local', {
+        session: true,
+        successRedirect: '/me',
+        failureRedirect: '/auth/login',
+        failureFlash: true,
+        badRequestMessage: 'Invalid email or password',
+    }));
+
+    app.get('/auth/google/callback', guestOnly, passport.authenticate('google', {
+        session: true,
+        failureRedirect: '/auth/login',
+        successRedirect: '/me',
+    }));
+
+    app.get('/auth/github/callback', guestOnly, passport.authenticate('github', {
+        session: true,
+        successRedirect: '/me',
+        failureRedirect: '/auth/login',
+    }));
+}
+
+```
+
+### Local login strategy
+In local strategy I simply query user by email, if password is undefined that means user uses social auth provider. If password is definied I can verify with my hash function, if passwords are the same - I create session for user.
+
+> /strategies/local-strategy.ts
+```ts
+import { Strategy } from 'passport-local';
+import { userRepository } from '../setup/db';
+import argon2 from 'argon2';
+
+const invalidMatch = { message: 'Invalid email or password' };
+
+export const localStrategy = new Strategy({
+    usernameField: 'email',
+    passReqToCallback: true,
+}, async (req, email, password, done) => {
+    const user = await userRepository.findOneBy({ email });
+    if (!user) {
+        return done(null, false, invalidMatch);
+    }
+
+    if (!user.password) {
+        return done(null, false, invalidMatch);
+    }
+
+    const areSame = await argon2.verify(user.password, password);
+    if (!areSame) {
+        return done(null, false, invalidMatch);
+    }
+
+    return done(null, { id: user.id });
+});
+```
+
+### Google and GitHub strategies
+I create simple helper functions to get verified emails and picture from social providers.
+> /utils.ts
+```ts
+import { createHash } from 'crypto';
+
+export function createGravatar(email: string) {
+    const hash = createHash('md5').update(email).digest('hex');
+    return `https://www.gravatar.com/avatar/${hash}`;
+}
+
+interface Picture {
+    value: string;
+}
+
+export function getPicture(email: string, photosArray?: Picture[]) {
+    if (photosArray && photosArray.length) {
+        return photosArray[0].value;
+    }
+
+    // create gravatar if social provider for some reason doesn't return picture
+    return createGravatar(email);
+}
+
+export interface GoogleEmail {
+    value: string;
+    verified: boolean;
+}
+
+export function getGoogleEmail(emails?: GoogleEmail[]) {
+    if (!emails) {
+        return;
+    }
+
+    const verifiedEmail = emails.find(email => email.verified);
+    if (!verifiedEmail) {
+        return;
+    }
+
+    return verifiedEmail.value;
+}
+
+export interface GithubEmail {
+    value: string;
+    verified: boolean;
+    primary: boolean;
+}
+
+export function getGithubEmail(emails?: GithubEmail[]) {
+    if (!emails) {
+        return;
+    }
+
+    const primaryEmail = emails.find(email => email.primary && email.verified);
+    if (!primaryEmail) {
+        return;
+    }
+
+    return primaryEmail.value;
+}
+```
+
+Code for both social strategies is very similar. As you can see I check if email is verified before I perform any action. You can also observe two functions:
+- `findLinkedAccount` searches for existing social account
+- `linkAccount` as you can guess link new social provider to existing account OR create completely new user.
+
+> /strategies/google-strategy.ts
+```ts
+import { Strategy } from "passport-google-oauth20";
+import { findLinkedAccount, linkAccount } from "../link-account";
+import { Providers } from "../types";
+import { getGoogleEmail, getPicture } from "../utils";
+
+export const googleStrategy = new Strategy({
+    clientID: process.env.GOOGLE_CLIENT_ID!,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    callbackURL: '/auth/google/callback',
+    scope: ['email', 'profile'],
+}, async (_accessToken, _refreshToken, profile, done) => {
+    const email = getGoogleEmail(profile.emails as any);
+    if (!email) {
+        return done(new Error('Google account email must be verified'));
+    }
+
+    const linkedUserId = await findLinkedAccount(Providers.GOOGLE, profile.id);
+    if (linkedUserId) {
+        return done(null, { id: linkedUserId });
+    }
+
+    const createdUserId = await linkAccount(Providers.GOOGLE, {
+        name: profile.displayName,
+        email: email,
+        picture: getPicture(email, profile.photos),
+        subject: profile.id,
+    });
+
+    return done(null, { id: createdUserId });
+});
+```
+
+> /strategies/github-strategy.ts
+```ts
+import { Strategy, Profile } from 'passport-github2';
+import { getGithubEmail, getPicture } from '../utils';
+import { findLinkedAccount, linkAccount } from '../link-account';
+import { Providers } from '../types';
+
+export const githubStrategy = new Strategy({
+    clientID: process.env.GITHUB_CLIENT_ID!,
+    clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+    callbackURL: '/auth/github/callback',
+    scope: ['user:email'],
+    // @ts-ignore:
+    allRawEmails: true,
+}, async (_accessToken, _refreshToken, profile: Profile, done) => {
+    const email = getGithubEmail(profile.emails as any);
+    if (!email) {
+        return done(new Error('GitHub account primary email must be verified'));
+    }
+
+    const linkedUserId = await findLinkedAccount(Providers.GITHUB, profile.id);
+    if (linkedUserId) {
+        return done(null, { id: linkedUserId });
+    }
+
+    const createdUserId = await linkAccount(Providers.GITHUB, {
+        name: profile.displayName,
+        email: email,
+        picture: getPicture(email, profile.photos),
+        subject: profile.id,
+    });
+
+    return done(null, { id: createdUserId });
+});
+```

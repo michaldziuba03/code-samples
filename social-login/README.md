@@ -79,6 +79,12 @@ If you'd rather read than watch... I also prepared text version.
         <li><a href="#third-method---user-can-login-with-multiple-providers-but-needs-to-verify-email-if-account-already-exists">Third method</a></li>
       </ul>
     </li>
+    <li>
+      <a href="#code-sample">Code Sample</a>
+      <ul>
+        <li><a href="#database-setup">Database setup</a></li>
+      </ul>
+    </li>
   </ol>
 </details>
 
@@ -271,3 +277,89 @@ If exists you link new social provider account. Now user can just use that socia
 
 #### Cons:
 - most complex and actually not that easy to implement correctly
+
+## Code sample
+Let's implement second method in TypeScript and Node.js
+
+### Database setup
+I gonna use TypeORM with SQLite driver (I use SQLite to make project easier to run, without requiring knowledge of tools like Docker).
+
+> /setup/db.ts
+```ts
+import { DataSource } from 'typeorm';
+import { User } from '../entities/User';
+import { FederatedAccount } from '../entities/FederatedAccount';
+
+export const sampleDataSource = new DataSource({
+    type: 'sqlite',
+    database: "sample.db",
+    entities: [User, FederatedAccount],
+    synchronize: true,
+});
+
+export const userRepository = sampleDataSource.getRepository(User);
+export const federatedAccountRepository = sampleDataSource.getRepository(FederatedAccount);
+
+export async function startDatabase() {
+    await sampleDataSource.initialize();
+}
+```
+
+I extended `User` entity with `picture` column.
+> /entities/User.ts
+```ts
+import { Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { FederatedAccount } from './FederatedAccount';
+
+@Entity('users')
+export class User {
+    @PrimaryGeneratedColumn()
+    id: number;
+
+    @Column()
+    picture: string;
+
+    @Column()
+    name: string;
+
+    @Column()
+    email: string;
+
+    @Column({ nullable: true })
+    password?: string;
+
+    @OneToMany(() => FederatedAccount, account => account.user)
+    accounts: FederatedAccount[];
+}
+```
+
+> /entities/FederatedAccount.ts
+```ts
+import {
+    Column,
+    Entity,
+    JoinColumn,
+    ManyToOne,
+    PrimaryColumn,
+    Unique
+} from "typeorm";
+import { User } from "./User";
+import { Providers } from "../types";
+
+@Entity('federated_accounts')
+@Unique(['provider', 'subject'])
+export class FederatedAccount {
+    @PrimaryColumn()
+    provider: Providers;
+
+    @PrimaryColumn()
+    subject: string; // id from provider account
+
+    @ManyToOne(() => User, (user) => user.id)
+    @JoinColumn({ name: 'user_id'})
+    user: User;
+
+    @Column({ name: 'user_id' })
+    userId: number;
+}
+```

@@ -363,3 +363,128 @@ export class FederatedAccount {
     userId: number;
 }
 ```
+
+### Express.js and middlewares setup
+Let's create two simple guard middlewares. We want login and register pages to be available only for guests (unauthenticated users) and profile page to be available only for authenticated users. 
+
+> /setup/middlewares.ts
+```ts
+import { NextFunction, Request, Response } from 'express';
+
+export function authenticatedOnly(req: Request, res: Response, next: NextFunction) {
+    if (req.isUnauthenticated()) {
+        return res.redirect('/auth/login');
+    }
+
+    next();
+}
+
+export function guestOnly(req: Request, res: Response, next: NextFunction) {
+    if (req.isAuthenticated()) {
+        return res.redirect('/me');
+    }
+
+    next();
+}
+
+```
+
+In `server.ts` I configure Express.js and simply add request handlers for rendering pages like login, register. In profile page `/me` I query database for user with connected social accounts.
+> /server.ts
+```ts
+import 'reflect-metadata';
+import { config } from 'dotenv';
+config();
+import express from 'express';
+import { setupPassport } from './setup/passport';
+import { authenticatedOnly, guestOnly } from './setup/middlewares';
+import { startDatabase, userRepository } from './setup/db';
+import { createGravatar } from './utils';
+import argon2 from 'argon2';
+import flash from 'express-flash';
+
+startDatabase();
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
+app.set('view engine', 'ejs');
+app.use(flash());
+setupPassport(app);
+
+app.get('/', (req, res) => {
+    res.redirect('/me');
+});
+
+app.get('/me', authenticatedOnly, async (req, res) => {
+    const user = await userRepository.findOne({
+        where: { id: req.user!.id },
+        select: ['id', 'picture', 'name', 'accounts'],
+        relations: { accounts: true },
+    });
+
+    return res.render('me', {
+        user,
+    });
+});
+
+app.get('/auth/login', guestOnly, (req, res) => {
+    const errors = req.flash('error') || [];
+    res.render('login', {
+        error: errors[0],
+    });
+});
+
+app.get('/auth/register', guestOnly, (req, res) => {
+    const errors = req.flash('error') || [];
+    res.render('register', {
+        error: errors[0],
+    });
+});
+
+
+app.listen(3000, () => {
+    console.log('Server started');
+});
+```
+
+### Register and logout
+I create simple function to generate gravatar URL for every new user registered with "local" provider.
+> /utils.ts
+```ts
+import { createHash } from 'crypto';
+
+export function createGravatar(email: string) {
+    const hash = createHash('md5').update(email).digest('hex');
+    return `https://www.gravatar.com/avatar/${hash}`;
+}
+```
+
+Register handler is also nothing special - just query user by email address, if user already exists flash error, otherwise hash password and insert new user to database.
+> /server.ts - continuation
+```ts
+app.post('/auth/register', guestOnly, async (req, res) => {
+   const { email, name, password } = req.body;
+   const exists = await userRepository.exist({ where: { email } });
+   if (exists) {
+       req.flash('error', ['User already exists']);
+       return res.redirect('/auth/register');
+   }
+
+   const hashedPassword = await argon2.hash(password);
+   await userRepository.save({
+       email,
+       name,
+       password: hashedPassword,
+       picture: createGravatar(email),
+   });
+
+    req.flash('success', 'Now you can login to created account');
+    return res.redirect('/auth/login');
+});
+
+app.get('/logout', authenticatedOnly, (req, res) => {
+   req.logout({ keepSessionInfo: false }, () => {});
+   return res.redirect('/auth/login');
+});
+```

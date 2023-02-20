@@ -1,5 +1,5 @@
 import { Strategy } from 'passport-local';
-import { userRepository } from '../db';
+import { userRepository } from '../setup/db';
 import argon2 from 'argon2';
 
 const invalidMatch = { message: 'Invalid email or password' };

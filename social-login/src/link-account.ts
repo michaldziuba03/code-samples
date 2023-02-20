@@ -1,9 +1,9 @@
-import { LinkAccountOptions, Providers } from "./types";
+import { LinkAccountOptions, Providers } from './types';
 import {
     federatedAccountRepository,
     sampleDataSource,
     userRepository
-} from "./db";
+} from './setup/db';
 
 export async function findLinkedAccount(provider: Providers, subject: string) {
     const federatedAccount = await federatedAccountRepository.findOneBy({

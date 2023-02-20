@@ -1,7 +1,7 @@
-import { Strategy, Profile } from "passport-github2";
-import { getGithubEmail, getPicture } from "../utils";
-import { findLinkedAccount, linkAccount } from "../link-account";
-import { Providers } from "../types";
+import { Strategy, Profile } from 'passport-github2';
+import { getGithubEmail, getPicture } from '../utils';
+import { findLinkedAccount, linkAccount } from '../link-account';
+import { Providers } from '../types';
 
 export const githubStrategy = new Strategy({
     clientID: process.env.GITHUB_CLIENT_ID!,

@@ -1,10 +1,10 @@
 import passport from 'passport';
 import { Express } from 'express';
-import { googleStrategy } from './strategies/google-strategy';
-import { githubStrategy } from './strategies/github-strategy';
-import session from "express-session";
-import {guestOnly} from "./middlewares";
-import {localStrategy} from "./strategies/local-strategy";
+import { googleStrategy } from '../strategies/google-strategy';
+import { githubStrategy } from '../strategies/github-strategy';
+import session from 'express-session';
+import { guestOnly } from './middlewares';
+import { localStrategy } from '../strategies/local-strategy';
 
 export function setupPassport(app: Express) {
     app.use(session({

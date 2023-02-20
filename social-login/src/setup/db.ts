@@ -1,7 +1,7 @@
 
 import { DataSource } from 'typeorm';
-import { User } from "./entities/User";
-import { FederatedAccount } from "./entities/FederatedAccount";
+import { User } from '../entities/User';
+import { FederatedAccount } from '../entities/FederatedAccount';
 
 export const sampleDataSource = new DataSource({
     type: 'sqlite',

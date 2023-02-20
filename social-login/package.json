@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "css:watch": "tailwindcss -i ./public/tailwind.css -o ./public/style.min.css --watch --minify",
-    "dev": "ts-node-dev src/main.ts",
+    "css:build": "tailwindcss -i ./public/tailwind.css -o ./public/style.min.css --minify",
+    "dev": "ts-node-dev src/server.ts",
     "test": "jest"
   },
   "keywords": [

@@ -1,13 +1,15 @@
+import 'reflect-metadata';
 import { config } from 'dotenv';
 config();
 import express from 'express';
-import { setupPassport } from "./passport";
-import { authenticatedOnly, guestOnly } from "./middlewares";
-import { federatedAccountRepository, userRepository } from "./db";
-import { createGravatar } from "./utils";
+import { setupPassport } from './setup/passport';
+import { authenticatedOnly, guestOnly } from './setup/middlewares';
+import { startDatabase, userRepository } from './setup/db';
+import { createGravatar } from './utils';
 import argon2 from 'argon2';
-import flash from "express-flash";
+import flash from 'express-flash';
 
+startDatabase();
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -16,9 +18,13 @@ app.set('view engine', 'ejs');
 app.use(flash());
 setupPassport(app);
 
+app.get('/', (req, res) => {
+    res.redirect('/me');
+});
+
 app.get('/me', authenticatedOnly, async (req, res) => {
     const user = await userRepository.findOne({
-        where: { id: req.user.id },
+        where: { id: req.user!.id },
         select: ['id', 'picture', 'name', 'accounts'],
         relations: { accounts: true },
     });

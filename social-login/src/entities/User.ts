@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import {Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn} from "typeorm";
+import { FederatedAccount } from "./FederatedAccount";
 
 @Entity('users')
 export class User {
@@ -16,4 +17,7 @@ export class User {
 
     @Column({ nullable: true })
     password?: string;
+
+    @OneToMany(() => FederatedAccount, account => account.user)
+    accounts: FederatedAccount[];
 }

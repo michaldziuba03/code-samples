@@ -10,9 +10,9 @@
 </head>
 <body>
 <div class="flex min-h-screen justify-center items-center login-bg">
-    <div class="bg-white drop-shadow-xl py-11 px-8 rounded">
+    <div class="bg-white sm:drop-shadow-xl py-11 px-8 rounded w-full sm:w-auto">
         <h1 class="text-2xl font-bold mb-8">Create new account</h1>
-        <form method="post" action="/auth/register" class="flex flex-col gap-2 w-96">
+        <form method="post" action="/auth/register" class="flex flex-col gap-2 sm:w-96">
             <a class="social-btn" href="/auth/google">
                 <img src="/google.svg" alt="Google logo" />
                 Continue with Google
@@ -39,20 +39,20 @@
 
             <div class="flex flex-col">
                 <label for="email-input" class="text-sm">Email</label>
-                <input class="form-element" required type="email" placeholder="Enter email" id="email-input">
+                <input name="email" class="form-element" required type="email" placeholder="Enter email" id="email-input">
             </div>
 
             <div class="flex flex-col">
                 <label for="name-input" class="text-sm">Name</label>
-                <input class="form-element" required type="text" placeholder="Enter name" id="name-input">
+                <input name="name" class="form-element" required type="text" placeholder="Enter name" id="name-input">
             </div>
 
             <div class="flex flex-col">
                 <label for="password-input" class="text-sm">Password</label>
-                <input class="form-element" required type="password" placeholder="Enter password" id="password-input">
+                <input name="password" class="form-element" required type="password" placeholder="Enter password" id="password-input">
             </div>
 
-            <button class="form-element select-none my-4 bg-black hover:bg-gray-800 text-white" type="submit">Sign Up</button>
+            <button class="btn" type="submit">Sign Up</button>
 
             <span class="text-center text-gray-600">Already have an account?&nbsp;
                     <a class="font-bold text-gray-800" href="/auth/login">Sign in </a>

@@ -7,14 +7,21 @@
 /*noinspection CssInvalidAtRule*/
 @tailwind utilities;
 
-.login-bg {
-    background-image: url("/background.jpg");
-    background-position: center;
-    background-size: cover;
+@media (min-width: 640px) {
+    .login-bg {
+        background-image: url("/background.jpg");
+        background-position: center;
+        background-size: cover;
+    }
 }
+
 
 .form-element {
     @apply p-3 border rounded;
+}
+
+.btn {
+    @apply form-element select-none my-4 bg-black hover:bg-gray-800 text-white;
 }
 
 .social-btn {

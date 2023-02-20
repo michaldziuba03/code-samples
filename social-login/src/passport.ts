@@ -12,25 +12,17 @@ export function setupPassport(app: Express) {
         secret: process.env.SESSION_SECRET!,
         resave: false,
         saveUninitialized: false,
-        cookie: {
-            sameSite: true,
-            httpOnly: true,
-        },
     }));
 
     app.use(passport.initialize());
     app.use(passport.session());
 
     passport.serializeUser(function(user, cb) {
-        process.nextTick(function() {
-            return cb(null, user);
-        });
+        return cb(null, user);
     });
 
     passport.deserializeUser(function(user: any, cb) {
-        process.nextTick(function() {
-            return cb(null, user);
-        });
+        return cb(null, user);
     });
 
     passport.use(localStrategy);
@@ -51,8 +43,8 @@ export function setupPassport(app: Express) {
 
     app.get('/auth/google/callback', guestOnly, passport.authenticate('google', {
         session: true,
-        successRedirect: '/me',
         failureRedirect: '/auth/login',
+        successRedirect: '/me',
     }));
 
     app.get('/auth/github/callback', guestOnly, passport.authenticate('github', {

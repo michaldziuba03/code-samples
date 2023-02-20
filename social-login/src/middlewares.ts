@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 
 export function authenticatedOnly(req: Request, res: Response, next: NextFunction) {
     if (req.isUnauthenticated()) {
-        return res.redirect('/');
+        return res.redirect('/auth/login');
     }
 
     next();

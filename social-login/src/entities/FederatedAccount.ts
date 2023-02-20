@@ -19,7 +19,7 @@ export class FederatedAccount {
     subject: string; // id from provider account
 
     @ManyToOne(() => User, (user) => user.id)
-    @JoinColumn({ name: 'user_id' })
+    @JoinColumn({ name: 'user_id'})
     user: User;
 
     @Column({ name: 'user_id' })

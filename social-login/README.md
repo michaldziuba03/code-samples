@@ -36,6 +36,14 @@ Now you can run application:
 npm run dev
 ```
 
+## Screenshots
+I decided to make app more eye-appealing with Tailwind :)
+
+<img alt="screenshot" width="700px" src="https://user-images.githubusercontent.com/43048524/219996750-a7d7e813-bd20-40c7-be60-55c348133cd8.png" />
+<img alt="screenshot" width="700px" src="https://user-images.githubusercontent.com/43048524/219996868-73e7f59e-9122-44bf-b33a-07e507842f9a.png" />
+<img alt="screenshot" width="700px" src="https://user-images.githubusercontent.com/43048524/219996962-31a471bd-18ac-470c-86e0-cf7367107eed.png" />
+
+
 # Article
 If you'd rather read than watch... I also prepared text version.
 

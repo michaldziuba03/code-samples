@@ -725,3 +725,65 @@ export const githubStrategy = new Strategy({
     return done(null, { id: createdUserId });
 });
 ```
+
+> /link-account.ts
+In the `findLinkedAccount` function we just query the `federated_accounts` table, if `federatedAccount` exists, we return the id of actual user.
+```ts
+import { LinkAccountOptions, Providers } from './types';
+import {
+    federatedAccountRepository,
+    sampleDataSource,
+    userRepository
+} from './setup/db';
+
+export async function findLinkedAccount(provider: Providers, subject: string) {
+    const federatedAccount = await federatedAccountRepository.findOneBy({
+        provider, subject
+    });
+
+    if (!federatedAccount) {
+        return;
+    }
+
+    return federatedAccount.userId;
+}
+```
+
+In `linkAccount` function, we simply search user by email form social provider, if user with that email already exists - we just create new federatedAccount entry linked to existing user. If user does not exists - we register new user and create federatedAccount linked to created user. 
+
+Creating new user is running in transaction to avoid data inconsistency in case of failure.
+
+> /link-account.ts - continuation
+```ts
+export async function linkAccount(provider: Providers, options: LinkAccountOptions) {
+    const { subject, picture, name, email } = options;
+    const user = await userRepository.findOneBy({ email });
+    if (user) {
+        await federatedAccountRepository.save({
+            subject,
+            provider,
+            userId: user.id,
+        });
+
+        return user.id;
+    }
+
+    return await sampleDataSource.transaction(async t => {
+        const newUser = userRepository.create({
+            name,
+            email,
+            picture,
+        });
+
+        const createdUser = await t.save(newUser);
+        const newFederatedAccount = federatedAccountRepository.create({
+            userId: createdUser.id,
+            provider,
+            subject,
+        });
+
+        await t.save(newFederatedAccount);
+        return createdUser.id;
+    });
+}
+```

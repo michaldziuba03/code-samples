@@ -51,7 +51,6 @@ I decided to make app more eye-appealing with Tailwind :)
 
 
 # Article
-If you'd rather read than watch... I also prepared text version.
 
 <details>
   <summary><h3>Table of Contents</h3></summary>
@@ -89,21 +88,15 @@ If you'd rather read than watch... I also prepared text version.
 </details>
 
 ## Intro
-I have seen many tutorials and articles about social login in Node.js, and most of them don't cover the actual integration with the database. This article is not a typical tutorial. I just want to discuss the tricky parts of social authentication, possible database schemas and common mistakes I have observed in other people's code. If you are struggling with a similar problem, I hope you will find this text helpful.
+I have seen many tutorials and articles about social login in Node.js, and most of them don't cover the actual integration with the database. This article is not a typical tutorial. I just want to discuss the tricky parts of social authentication, possible database schemas and common mistakes I have observed in other people's codes. If you are facing a similar problem, I hope you will find this text helpful.
 
-> This article DOESN'T pretend to show you best practices - text is based on my own opinions and thoughts.
-
-Article assumes you are more advanced and you at least know:
-1. Express.js and Node.js ecosystem
-2. Passport.js
-3. TypeScript
-4. HTTP Protocol
+> This article DOESN'T pretend to show you best practices - this text is based on my own opinions and thoughts.
 
 ## Passport.js
-Now let's talk a little bit about the most popular auth middleware for Node.js - PassportJS. I found using this library in a modern TypeScript stack to be a bit of a pain for me. Passport just feels a little bit outdated.
+Now let's talk about the most popular auth middleware for Node.js - PassportJS. I found using this library in a modern TypeScript stack to be a pain for me. PassportJS just feels a little bit outdated.
 
 ### Strategies graveyard
-What scares me the most is development activity in PassportJS. According to the official website, Passport.js contains over 500 strategies. Some **official** strategies like `passport-github` are just broken and for that reason I use `passport-github2` in the code sample. Dead strategies are the reason why I maintain my own strategies for my side projects.
+What scares me the most in PassportJS? The development activity. According to the official website, Passport.js contains over 500 strategies and some of them, even **official** strategies like `passport-github` are just [kinda broken](https://github.com/jaredhanson/passport-github/issues/75). For that reason I use `passport-github2` in the code sample.
 
 
 <p align="center">

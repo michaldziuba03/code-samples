@@ -6,3 +6,20 @@
 <p align="center"> 
   Node.js • TypeScript • NodeMailer • Express.js
 </p>
+
+## Setup and run
+Clone repository:
+```
+git clone git@github.com:michaldziuba03/samples.git
+cd samples/reset-password
+```
+
+Install dependencies with npm:
+```
+npm install
+```
+
+Now you can run application:
+```
+npm run dev
+```

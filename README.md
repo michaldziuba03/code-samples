@@ -14,6 +14,10 @@ I really want to make each code sample as easy to run as possible, so most sampl
 - npm because I don't want to enforce specific package manager (npm is just installed by default with Node.js, right?)
 - Express.js because everyone who uses Node.js knows this framework
 
+#### + specific for feature libraries. Key factors for library choice:
+- library must be popular among the community (example library: PassportJS)
+- library cannot be created by me (I don't use guides to promote my own solutions/packages)
+
 I also made some personal choices like:
 - TypeScript
 - TypeORM

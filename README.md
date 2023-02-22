@@ -1,13 +1,20 @@
+![baner](https://user-images.githubusercontent.com/43048524/220498069-911a0665-9255-4670-b70a-c366b2dea31d.png)
+
 ## Code Samples
 Single place for sample projects from my YouTube videos and articles.
 
 ### Goals behind the project
-1. I want to give you some tips if you are facing implementation problems with specific feature.
-2. I want to improve my English skills by writing guides and recording videos.
-3. I want to share my observations and knowledge with other people.
-4. I want to learn new stuff by doing research.
-5. I want to share good resources made by other people (with each guide I also provide useful links).
-5. I also treat written guides as my personal (but public) notes.
+- I want to give you some tips if you are facing implementation problems with specific feature.
+- I want to improve my English skills by writing guides and recording videos.
+- I want to share my observations and knowledge with other people.
+- I want to learn new stuff by doing research.
+- I want to share good resources made by other people (with each guide I also provide useful links).
+- I also treat written guides as my personal (but public) notes.
+
+### Project challenges
+- It's hard to write/talk about technical stuff in foreign language
+- It's hard to write/talk about technical stuff at all :)
+- It's really time consuming (doing research,  writing code, planning article and video, recording video)
 
 ### Audience
 I'm targeting more advanced users who mostly understand what they are doing.

@@ -37,7 +37,7 @@ npm run dev
 ```
 
 ## Screenshots
-I decided to make app more eye-appealing with Tailwind :)
+I decided to make app more eye-appealing with Tailwind.
 
 > GET /auth/register
 <img alt="screenshot" width="700px" src="https://user-images.githubusercontent.com/43048524/219996750-a7d7e813-bd20-40c7-be60-55c348133cd8.png" />
@@ -104,7 +104,7 @@ What scares me the most in PassportJS? The development activity. According to th
 </p>
 
 ### TypeScript problems
-Some types are just incorrect. Here is an example - `profile.emails[0].verified` is actually BOOLEAN, but is typed as string literal.
+Some types are just incorrect. Here is an example: `profile.emails[0].verified` is actually BOOLEAN, but is typed as string literal.
 
 <img width="600" src="https://user-images.githubusercontent.com/43048524/218768285-762e287a-18b9-476f-a700-2214d49813ba.png" />
 
@@ -114,32 +114,34 @@ I found that option exists by reading a source code of strategy...
 
 
 ## OAuth 2.0 standard
-We cannot discuss social authentication without mentioning the OAuth 2.0 standard. This standard is a core of most Passport.js strategies, so I think it's important to understand at least the data flow. Most Passport.js strategies use `Authorization Code Flow`, because this flow is suited for a regular server applications.
-
+We cannot discuss social authentication without mentioning the OAuth 2.0 standard. This standard is the basis of most Passport.js strategies, so I think it's important to understand at least the data flow. Most Passport.js strategies use `Authorization Code Flow`, because this flow is suited for a regular server applications.
 
 ### OAuth 2.0 Authorization Code Flow example
 1. User clicks `Continue with GitHub` button.
 2. Button redirects user to GitHub authorization page.
+3. On GitHub authorization page, user must first log in to the service. Then they will be prompted by the service to authorize or deny the application access to their account.
 4. After successful authorization, GitHub redirects user back to our application (to callback endpoint) and sends `code` in query params.
-5. Our application exchange `code` value for access token by sending code, client id and client secret to GitHub servers.
-6. Our application sends an authorized request (with obtained access token) to the GitHub API and retrieves the profile of authorized user.
+5. Our application exchange `code` value for access token by sending **code**, **client id** and **client secret** to GitHub servers.
+6. Our application sends an authorized request (with obtained access token) to the GitHub API and retrieves the profile of the authorized user.
 7. Now we can use that profile data to login or register new account in our system.
 
+### Some additional resources about OAuth 2.0
+- https://www.digitalocean.com/community/tutorials/an-introduction-to-oauth-2
+- https://auth0.com/intro-to-iam/what-is-oauth-2
+- https://auth0.com/docs/get-started/authentication-and-authorization-flow/which-oauth-2-0-flow-should-i-use
+- https://oauth.net/2/oauth-best-practice/
 
 ## Social login implementation overview
 Now let's get to the right part of article. We will be talking about the moment when you get the user's profile in the Passport.js strategy callback. During my little research, I have observed at least 3 ways to implement social authentication.
 
 ### Some universal rules and common gotchas
-Before we will discuss each social auth implementation, I want to talk about some universal rules that apply to any method:
+Before we will discuss each social auth implementation method, I want to mention a few universal rules that apply to any method:
 
-1. Email address is not reliable for existing account lookup - use social account's unique id instead. In my implementations I use emails only for linking new social provider to existing account OR creating new account. Why email address from social provider is not reliable? Because in some providers you can CHANGE email address and in some implementation I have seen, you will end up with new account in that case :)
+1. Email address is not reliable for existing account lookup - use social account's id instead. In my implementations I use emails only for linking new social provider to existing account OR creating new account. Why email address from social provider is not reliable? Because in some providers you can **CHANGE** email address and in some implementations I have seen, you will end up with new account in that case :)
 
-2. Email address from social provider must be verified. It's very important if you want to link new social provider to existing account. Why? Because some bad actor can find out that specific email is registered in your application and create new account with that email for example on Google. Bad actor doesn't have access to that email but control Google account with that email. He can use that unverified Google account to get access to legitimate account from your application. 
+2. Email address from social provider must be verified. It's very important if you want to link new social provider to existing account. Why? Because some bad actor can find out that a particular email is registered in your application and create a new Google (as example) account with that email address. Bad actor can use that unverified Google account to get access to legitimate account from your application.
 
-3. Some providers actually may not return email address. In some providers user can register with phone number - keep that fact in mind. Some possible solutions:
-- simply deny social accounts without email address
-- prompt user to provide manually email address
-- save that phone number as email in your database (you may add additional flag like `hasEmail: false` or something like that).
+3. Some providers may not return the email address. In some providers user can register with a phone number. You can simply deny social accounts without email or save phone number (if returned) in email column/field.
 
 ### First method - user can login with ONLY one provider
 The first method is fairly simple. User can use only one authentication method for specific email. That means you cannot link your Google account if you registered with email and password method previously.
@@ -162,7 +164,7 @@ For MongoDB schema is the same:
 ```
 
 #### Example flow
-I will briefly explain this method, because in this article we will focus actually on second method.
+I will briefly explain this method, because I want to focus actually on second method.
 1. Find user by provider and social account id
 2. If user already exists - create session/JWT
 3. If user doesn't exists - create new one using profile data from social provider (email, social account id, displayName). Make sure email is not already taken.
@@ -174,15 +176,14 @@ I will briefly explain this method, because in this article we will focus actual
 - bad user experience - most people expects your application to link their social accounts connected to the same email address
 
 ### Second method - user can login with multiple providers
-The second method is most common implementation but is also more complex and requires 2 entities. User can link multiple authentication providers (connected to the same email address) to a single account.
+The second method is the most common implementation but is also more complex. User can link multiple authentication providers (connected to the same email address) to a single account.
 
 #### Relational databases
 ![image](https://user-images.githubusercontent.com/43048524/219093100-36628861-ea9f-4dc7-bf49-862a1a4275fd.png)
 > Entity diagram generated with [dbdiagram.io](https://dbdiagram.io/)
 
 #### MongoDB
-MongoDB schema is more flexible and there is no reason to normalize data (you probably shouldn't create additional collection to store federated accounts, just store them in user document). Example schemas for `users` collection:
-
+MongoDB schema is more flexible and there is no reason to normalize data (you shouldn't create additional collection to store federated accounts, just store them in user document). Example schemas for `users` collection:
 ```json
 {
   "_id": <ObjectId>,
@@ -206,10 +207,10 @@ MongoDB schema is more flexible and there is no reason to normalize data (you pr
   ]
 }
 ```
-> This schema is more generic and you can use same query for each social auth provider. I think you can create unique compound index for `accounts.provider` and `accounts.subject`.
+> This schema is more generic and you can use the same query for each social auth provider. I think you can create unique compound index for `accounts.provider` and `accounts.subject`.
 
 #### Example flow
-I gonna use SQL statements to explain flow. Imagine you are writing Google strategy verification callback and you got object like: 
+I gonna use SQL statements to explain flow. Imagine you are writing Google strategy verification callback and you got object like that:
 ```js
 {
   provider: 'google',
@@ -219,21 +220,21 @@ I gonna use SQL statements to explain flow. Imagine you are writing Google strat
   ...
 }
 ```
-1. Check if social account is already linked with query like:
+1. Check if social account is already linked:
 ```sql
 SELECT * FROM federated_accounts WHERE provider='google' AND subject='142984872137006300000';
 ```
-2. If federated account found then just create session/JWT by using `federated_accounts.user_id` field.
-3. If federated account does not exists, that means we have to check if user with email from social provider exists in database with query like:
+2. If federated account found then just authenticate user (create session/JWT) by using `federated_accounts.user_id` field.
+3. If federated account **doesn't** exist, then we have to check if user with the email from social provider exists in database:
 ```sql
 SELECT * FROM users WHERE email='johndoe@gmail.com';
 ```
-4. If user with that email exists (for example id is `20`) that means we want to just link another social provider, so create federated account with insert:
+4. If user with that email exists (for example their id is `20`), then just link another social provider, so create federated account with insert:
 ```sql
 INSERT INTO federated_accounts (provider, subject, user_id) VALUES ('google', '142984872137006300000', 20);
 ```
 5. After successful insert you can create session/JWT for a user with id=20.
-6. If user with that email does not exist, create brand new user and link social provider. I think you should run that query in transaction:
+6. If user with that email does not exist, create new user and link social provider. I think you should run that query in transaction:
 ```sql
 BEGIN;
   INSERT INTO users (name, email) VALUES ('John Doe', 'johndoe@gmail.com') RETURNING id; ---> id returns 21
@@ -247,10 +248,10 @@ COMMIT; ---> or ROLLBACK; in case of error
 
 #### Cons:
 - more complex
-- you put the trust to the 3rd party providers they verified email
+- you trust a third-party provider to verify email addresses
 
 ### Third method - user can login with multiple providers BUT needs to verify email if account already exists
-The last featured method is actually extended version of 2nd method. Let's assume you don't want to trust 3rd parties if they verified email - you want to verify on your own.
+The last featured method is actually extended version of 2nd method. Let's assume you don't want to trust 3rd parties and you prefer to verify emails on your own.
 
 #### Relational databases
 ![image](https://user-images.githubusercontent.com/43048524/219873324-49863fc4-624c-44b1-924f-d2b9911ceb13.png)
@@ -259,20 +260,21 @@ The last featured method is actually extended version of 2nd method. Let's assum
 #### Example flow
 Flow is actually very similar to second method. The only difference is how you create `federated_accounts` entry. You actually create `federated_accounts` after email verification.
 
-So if user tries to link new social provider to existing account - you generate unique token, save entry with user's data in `staged_accounts` and send email to the user. For additional security you can hash that verification token with `sha256` before inserting to database, but to the verification link you put plain token.
+So if user tries to link new social provider to existing account - you generate unique token, save entry with user's data in `staged_accounts` and send email to the user. For additional security you can hash that verification token with `sha256` before inserting to database, however to the verification link you put plain token. Don't forget about adding expiration time to the `staged_accounts`.
 
-When user clicks verification link -  you basically take than plain token, hash token and check if `staged_account` with that token already exist in database.
-If exists you link new social provider account. Now user can just use that social provider to login to their account.
+When user clicks verification link -  you basically hash plain token from link and check if `staged_account` with that token already exists in database.
+If exists you can link new social provider. Now user can just use that social provider to login to their account.
 
 #### Pros:
 - balanced user experience and security - their social accounts will be automatically linked to existing account with the same email BUT they have to login to the email and click the verification link.
-- you can verify on your own if user actually controls that email address
+- you can verify yourself if user actually controls particular email address
 
 #### Cons:
 - most complex and actually not that easy to implement correctly
+- user must check their email inbox
 
 ## Code sample
-Let's implement second method in TypeScript and Node.js
+Let's implement [second method](#second-method---user-can-login-with-multiple-providers) in TypeScript and Node.js
 
 ### Database setup
 I gonna use TypeORM with SQLite driver (I use SQLite to make project easier to run, without requiring knowledge of tools like Docker).

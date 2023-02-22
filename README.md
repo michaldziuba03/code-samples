@@ -3,6 +3,8 @@
 ## Code Samples
 Single place for sample projects from my YouTube videos and articles.
 
+> Any guide DOESN'T pretend to show you best practices. I just want to show my way of doing things.
+
 ### Goals behind the project
 - I want to give you some tips if you are facing implementation problems with specific feature.
 - I want to improve my English skills by writing guides and recording videos.
@@ -12,6 +14,7 @@ Single place for sample projects from my YouTube videos and articles.
 - I also treat written guides as my personal (but public) notes.
 
 ### Project challenges
+- I don't have any serious content creation experience
 - It's hard to write/talk about technical stuff in foreign language
 - It's hard to write/talk about technical stuff at all :)
 - It's really time consuming (doing research,  writing code, planning article and video, recording video)
@@ -29,7 +32,7 @@ I really want to make each code sample as easy to run as possible, so most sampl
 - library must be popular among the community (example library: PassportJS).
 - library cannot be created by me (I don't use guides to promote my own solutions/packages).
 
-#### I also made some personal choices like:
+#### + I also made some personal choices like:
 - TypeScript
 - TypeORM
 - EJS for HTML templates

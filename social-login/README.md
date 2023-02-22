@@ -37,8 +37,6 @@ npm run dev
 ```
 
 ## Screenshots
-I decided to make app more eye-appealing with Tailwind.
-
 > GET /auth/register
 <img alt="screenshot" width="700px" src="https://user-images.githubusercontent.com/43048524/219996750-a7d7e813-bd20-40c7-be60-55c348133cd8.png" />
 
@@ -93,7 +91,7 @@ I have seen many tutorials and articles about social login in Node.js, and most 
 > This article DOESN'T pretend to show you best practices - this text is based on my own opinions and thoughts.
 
 ## Passport.js
-Now let's talk about the most popular auth middleware for Node.js - PassportJS. I found using this library in a modern TypeScript stack to be a pain for me. PassportJS just feels a little bit outdated.
+Let's talk about the most popular auth middleware for Node.js - PassportJS. I found using this library in a modern TypeScript stack to be a pain for me. PassportJS just feels a little bit outdated.
 
 ### Strategies graveyard
 What scares me the most in PassportJS? The development activity. According to the official website, Passport.js contains over 500 strategies and some of them, even **official** strategies like `passport-github` are just [kinda broken](https://github.com/jaredhanson/passport-github/issues/75). For that reason I use `passport-github2` in the code sample.
@@ -165,9 +163,9 @@ For MongoDB schema is the same:
 
 #### Example flow
 I will briefly explain this method, because I want to focus actually on second method.
-1. Find user by provider and social account id
+1. Find user by provider and social account id (providerId)
 2. If user already exists - create session/JWT
-3. If user doesn't exists - create new one using profile data from social provider (email, social account id, displayName). Make sure email is not already taken.
+3. If user doesn't exists - create new user with data from social provider (email, social account id, displayName). Make sure email is not already taken.
 
 #### Pros:
 - easiest to implement
@@ -244,7 +242,7 @@ COMMIT; ---> or ROLLBACK; in case of error
 7. After successful transaction you can create session/JWT for that created user with id=21.
 
 #### Pros:
-- good user experience - their social accounts will be automatically linked to existing account with the same email.
+- good user experience - their social accounts will be automatically linked to an existing account with the same email address.
 
 #### Cons:
 - more complex
@@ -258,20 +256,20 @@ The last featured method is actually extended version of 2nd method. Let's assum
 > Entity diagram generated with [dbdiagram.io](https://dbdiagram.io/)
 
 #### Example flow
-Flow is actually very similar to second method. The only difference is how you create `federated_accounts` entry. You actually create `federated_accounts` after email verification.
+Flow is actually very similar to second method. The only difference is how you create `federated_accounts` entry. You actually create new federated account (link social provider) after email verification.
 
-So if user tries to link new social provider to existing account - you generate unique token, save entry with user's data in `staged_accounts` and send email to the user. For additional security you can hash that verification token with `sha256` before inserting to database, however to the verification link you put plain token. Don't forget about adding expiration time to the `staged_accounts`.
+So if user tries to link new social provider to existing account - you generate random unique token, save entry with user's data in `staged_accounts` and send email to the user. For better security you can hash that verification token with `sha256` before inserting to database, however to the verification link you put the plain token. Don't forget about adding expiration time checks to the `staged_accounts`.
 
-When user clicks verification link -  you basically hash plain token from link and check if `staged_account` with that token already exists in database.
-If exists you can link new social provider. Now user can just use that social provider to login to their account.
+When user clicks verification link -  you hash plain token from link and check if staged account with that token already exists in database.
+If it exists you can link new social provider. Now the user can simply use this social provider to log into their account.
 
 #### Pros:
-- balanced user experience and security - their social accounts will be automatically linked to existing account with the same email BUT they have to login to the email and click the verification link.
-- you can verify yourself if user actually controls particular email address
+- balanced user experience and security - their social accounts will be automatically linked to existing account with the same email BUT they have to verify email
+- you can verify on your own if the user actually controls the specified email address
 
 #### Cons:
-- most complex and actually not that easy to implement correctly
-- user must check their email inbox
+- the most complex featured solution and actually not that easy to implement correctly
+- user must check their email inbox (it hurts the user experience a bit)
 
 ## Code sample
 Let's implement [second method](#second-method---user-can-login-with-multiple-providers) in TypeScript and Node.js
@@ -300,7 +298,7 @@ export async function startDatabase() {
 }
 ```
 
-I extended `User` entity with `picture` column.
+I extended `User` entity with `picture` column. 
 > /entities/User.ts
 ```ts
 import { Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
@@ -360,7 +358,7 @@ export class FederatedAccount {
 ```
 
 ### Express.js and middlewares setup
-Let's create two simple guard middlewares. We want login and register pages to be available only for guests (unauthenticated users) and profile page to be available only for authenticated users. 
+Let's create two simple guard middlewares. We want `/login` and `/register` pages to be available only for guests (unauthenticated users) and `/me` page to be available only for authenticated users. 
 
 > /setup/middlewares.ts
 ```ts
@@ -384,7 +382,7 @@ export function guestOnly(req: Request, res: Response, next: NextFunction) {
 
 ```
 
-In `server.ts` I configure Express.js and simply add request handlers for rendering pages like login, register. In profile page `/me` I query database for user with connected social accounts.
+In `server.ts` I configure Express.js and simply add request handlers for rendering pages like login, register. In profile page `/me` I query database for the currently authenticated user with all connected social accounts.
 > /server.ts
 ```ts
 import 'reflect-metadata';
@@ -444,7 +442,7 @@ app.listen(3000, () => {
 ```
 
 ### Register and logout
-I create simple function to generate gravatar URL for every new user registered with "local" provider.
+Let's create simple function to generate gravatar URL for every new user registered with "local" provider.
 > /utils.ts
 ```ts
 import { createHash } from 'crypto';
@@ -455,7 +453,7 @@ export function createGravatar(email: string) {
 }
 ```
 
-Register handler is also nothing special - just query user by email address, if user already exists flash error, otherwise hash password and insert new user to database.
+Register handler is also nothing special - just query database for user by email address, if user already exists flash error, otherwise hash password and insert new user to database.
 > /server.ts - continuation
 ```ts
 app.post('/auth/register', guestOnly, async (req, res) => {
@@ -485,10 +483,7 @@ app.get('/logout', authenticatedOnly, (req, res) => {
 ```
 
 ### Passport setup
-In `passport.ts` I decided to put session configuration, standard passport configurations. I also added 3 strategies:
-- Google
-- GitHub
-- Local
+In `passport.ts` I decided to put session configuration and obviously passport strategy configurations.
 
 Still nothing special...
 
@@ -503,6 +498,7 @@ import { guestOnly } from './middlewares';
 import { localStrategy } from '../strategies/local-strategy';
 
 export function setupPassport(app: Express) {
+    //  We are using session authentication
     app.use(session({
         name: 'sid',
         secret: process.env.SESSION_SECRET!,
@@ -521,14 +517,17 @@ export function setupPassport(app: Express) {
         return cb(null, user);
     });
 
+    // Register all 3 strategies
     passport.use(localStrategy);
     passport.use(googleStrategy);
     passport.use(githubStrategy);
 
+    // Redirects to Google authorization page
     app.get('/auth/google', guestOnly, passport.authenticate('google'));
+    // Redirects to GitHub authorization page
     app.get('/auth/github', guestOnly, passport.authenticate('github'));
 
-    // @ts-ignore
+    // @ts-ignore: for some reason badRequestMessage is not typed
     app.post('/auth/login', guestOnly, passport.authenticate('local', {
         session: true,
         successRedirect: '/me',
@@ -537,23 +536,24 @@ export function setupPassport(app: Express) {
         badRequestMessage: 'Invalid email or password',
     }));
 
+    // Callback endpoints must be definied in OAuth application settings
     app.get('/auth/google/callback', guestOnly, passport.authenticate('google', {
         session: true,
         failureRedirect: '/auth/login',
         successRedirect: '/me',
     }));
 
+    // Callback endpoints must be definied in OAuth application settings
     app.get('/auth/github/callback', guestOnly, passport.authenticate('github', {
         session: true,
         successRedirect: '/me',
         failureRedirect: '/auth/login',
     }));
 }
-
 ```
 
 ### Local login strategy
-In local strategy I simply query user by email, if password is undefined that means user uses social auth provider. If password is definied I can verify with my hash function, if passwords are the same - I create session for user.
+In the local strategy, I just query the database for the user by email. If the password is undefined, it means the they use a social authentication provider, otherwise I can verify the password and create a session for the user.
 
 > /strategies/local-strategy.ts
 ```ts
@@ -647,9 +647,9 @@ export function getGithubEmail(emails?: GithubEmail[]) {
 }
 ```
 
-Code for both social strategies is very similar. As you can see I check if email is verified before I perform any action. You can also observe two functions:
-- `findLinkedAccount` searches for existing social account
-- `linkAccount` as you can guess link new social provider to existing account OR create completely new user.
+Code for both social strategies is very similar. As you can see I check if email is verified before I even perform any action. You can also observe two functions:
+- `findLinkedAccount` searches for existing social account. Returns user's id.
+- `linkAccount` links new social provider to existing account OR creates completely new user. Returns user's id as well.
 
 > /strategies/google-strategy.ts
 ```ts
@@ -664,16 +664,20 @@ export const googleStrategy = new Strategy({
     callbackURL: '/auth/google/callback',
     scope: ['email', 'profile'],
 }, async (_accessToken, _refreshToken, profile, done) => {
+    // get email from Google payload - we want only VERIFIED emails
     const email = getGoogleEmail(profile.emails as any);
     if (!email) {
         return done(new Error('Google account email must be verified'));
     }
 
+    // search database for federated account and return userId (implementation details will be later).
+    // Remember - search by social account id instead of email.
     const linkedUserId = await findLinkedAccount(Providers.GOOGLE, profile.id);
     if (linkedUserId) {
         return done(null, { id: linkedUserId });
     }
 
+    // if federated account connected to any user doesn't exist, we will search by email.
     const createdUserId = await linkAccount(Providers.GOOGLE, {
         name: profile.displayName,
         email: email,
@@ -721,8 +725,8 @@ export const githubStrategy = new Strategy({
 });
 ```
 
+In the `findLinkedAccount` function we just query the `federated_accounts` table, if federated account found, we return the id of the actual user.
 > /link-account.ts
-In the `findLinkedAccount` function we just query the `federated_accounts` table, if `federatedAccount` exists, we return the id of actual user.
 ```ts
 import { LinkAccountOptions, Providers } from './types';
 import {
@@ -744,9 +748,9 @@ export async function findLinkedAccount(provider: Providers, subject: string) {
 }
 ```
 
-In `linkAccount` function, we simply search user by email form social provider, if user with that email already exists - we just create new federatedAccount entry linked to existing user. If user does not exists - we register new user and create federatedAccount linked to created user. 
+In the `linkAccount` function, we simply search user by email from social provider, if user with that email already exists - we just create new federated account entry linked to existing user. If user does not exist - we register new user and create federated account linked to the created user. 
 
-Creating new user is running in transaction to avoid data inconsistency in case of failure.
+Last operation is running in transaction to avoid data inconsistency in case of failure.
 
 > /link-account.ts - continuation
 ```ts

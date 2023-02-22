@@ -80,6 +80,11 @@ npm run dev
       <a href="#code-sample">Code Sample</a>
       <ul>
         <li><a href="#database-setup">Database setup</a></li>
+        <li><a href="#expressjs-and-middlewares-setup">Express.js and middlewares setup</a></li>
+        <li><a href="#register-and-logout">Register and logout</a></li>
+        <li><a href="#passport-setup">Passport setup</a></li>
+        <li><a href="#local-login-strategy">Local login strategy</a></li>
+        <li><a href="#google-and-github-strategies">Google and GitHub strategies</a></li>
       </ul>
     </li>
   </ol>
@@ -130,12 +135,12 @@ We cannot discuss social authentication without mentioning the OAuth 2.0 standar
 - https://oauth.net/2/oauth-best-practice/
 
 ## Social login implementation overview
-Now let's get to the right part of article. We will be talking about the moment when you get the user's profile in the Passport.js strategy callback. During my little research, I have observed at least 3 ways to implement social authentication.
+Now let's move on to the actual part of the article. We will be talking about the moment when you get the user's profile in the Passport.js strategy callback. During my little research, I have observed at least 3 ways to implement social authentication.
 
 ### Some universal rules and common gotchas
 Before we will discuss each social auth implementation method, I want to mention a few universal rules that apply to any method:
 
-1. Email address is not reliable for existing account lookup - use social account's id instead. In my implementations I use emails only for linking new social provider to existing account OR creating new account. Why email address from social provider is not reliable? Because in some providers you can **CHANGE** email address and in some implementations I have seen, you will end up with new account in that case :)
+1. Email address is not reliable for existing account lookup - use social account's id instead. In my implementations I use emails only for linking **NEW** social provider to existing account OR creating new account. Why email address from social provider is not reliable? Because in some providers you can **CHANGE** email address and in some implementations I have seen, you will end up with new account in that case :)
 
 2. Email address from social provider must be verified. It's very important if you want to link new social provider to existing account. Why? Because some bad actor can find out that a particular email is registered in your application and create a new Google (as example) account with that email address. Bad actor can use that unverified Google account to get access to legitimate account from your application.
 
@@ -163,15 +168,16 @@ For MongoDB schema is the same:
 
 #### Example flow
 I will briefly explain this method, because I want to focus actually on second method.
-1. Find user by provider and social account id (providerId)
-2. If user already exists - create session/JWT
+1. Find user by provider and social account id (providerId).
+2. If user already exists - create session/JWT.
 3. If user doesn't exists - create new user with data from social provider (email, social account id, displayName). Make sure email is not already taken.
+4. Create session/JWT for created user.
 
 #### Pros:
 - easiest to implement
 
 #### Cons:
-- bad user experience - most people expects your application to link their social accounts connected to the same email address
+- bad user experience - most people expect your application to link their social accounts connected to the same email address
 
 ### Second method - user can login with multiple providers
 The second method is the most common implementation but is also more complex. User can link multiple authentication providers (connected to the same email address) to a single account.

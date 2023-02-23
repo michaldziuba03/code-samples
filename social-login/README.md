@@ -47,7 +47,6 @@ npm run dev
 > GET /me
 <img alt="screenshot" width="700px" src="https://user-images.githubusercontent.com/43048524/219996962-31a471bd-18ac-470c-86e0-cf7367107eed.png" />
 
-
 # Article
 
 <details>
@@ -66,6 +65,7 @@ npm run dev
     <li>
       <a href="#oauth-20-standard">OAuth 2.0 standard</a>
       <ul><li><a href="#oauth-20-authorization-code-flow-example">OAuth 2.0 Authorization Code Flow example</a></li></ul>
+      <ul><li><a href="#additional-resources-about-oauth-20">Additional resources about OAuth 2.0</a></li></ul>
     </li>
     <li>
       <a href="#social-login-implementation-overview">Social login implementation overview</a>
@@ -86,6 +86,12 @@ npm run dev
         <li><a href="#passport-setup">Passport setup</a></li>
         <li><a href="#local-login-strategy">Local login strategy</a></li>
         <li><a href="#google-and-github-strategies">Google and GitHub strategies</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#summary">Summary</a>
+      <ul>
+        <li><a href="#additional-resources">Additional resources</a></li>
       </ul>
     </li>
   </ol>
@@ -129,7 +135,7 @@ We cannot discuss social authentication without mentioning the OAuth 2.0 standar
 6. Our application sends an authorized request (with obtained access token) to the GitHub API and retrieves the profile of the authorized user.
 7. Now we can use that profile data to login or register new account in our system.
 
-### Some additional resources about OAuth 2.0
+### Additional resources about OAuth 2.0
 - https://www.digitalocean.com/community/tutorials/an-introduction-to-oauth-2
 - https://auth0.com/intro-to-iam/what-is-oauth-2
 - https://auth0.com/docs/get-started/authentication-and-authorization-flow/which-oauth-2-0-flow-should-i-use
@@ -969,3 +975,16 @@ export async function linkAccount(provider: Providers, options: LinkAccountOptio
     });
 }
 ```
+
+## Summary
+Thanks for reading this guide, I hope you found it helpful and interesting. Any feedback is welcome. Let me know if you know a better approach :)
+
+### Additional resources
+- [Sample application with Facebook login](https://github.com/passport/todos-express-facebook)
+- [Auth0 user profile schema](https://auth0.com/docs/manage-users/user-accounts/user-profiles/normalized-user-profile-schema)
+- [Google OAuth2 login without Passport.js video](https://www.youtube.com/watch?v=idqhYcXxbPs)
+- [GitHub OAuth2 login without Passport.js video](https://youtu.be/qUE4-kSlPIk)
+- [Official GitHub docs about authorizing OAuth apps](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps)
+- [All about Account Takeover (by Harsh Bothra)](https://infosecwriteups.com/all-about-account-takeover-825d8fcf2d57)
+- [Attacking Social Logins: Pre-Authentication Account Takeover (by xcheater)](https://hbothra22.medium.com/attacking-social-logins-pre-authentication-account-takeover-790248cfdc3)
+- [Pre-account takeover and Badoo report](https://hackerone.com/reports/1074047)

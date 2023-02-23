@@ -81,6 +81,7 @@ npm run dev
       <ul>
         <li><a href="#database-setup">Database setup</a></li>
         <li><a href="#expressjs-and-middlewares-setup">Express.js and middlewares setup</a></li>
+        <li><a href="#views-setup">Views setup</a></li>
         <li><a href="#register-and-logout">Register and logout</a></li>
         <li><a href="#passport-setup">Passport setup</a></li>
         <li><a href="#local-login-strategy">Local login strategy</a></li>
@@ -445,6 +446,182 @@ app.get('/auth/register', guestOnly, (req, res) => {
 app.listen(3000, () => {
     console.log('Server started');
 });
+```
+
+### Views setup
+I use EJS for HTML templates and Tailwind for styles. The simplest approach is to use the `<a>` element for social login buttons. In the [Passport setup](#passport-setup) section we will configure `/auth/google` and `/auth/github` routes. These paths will redirect users to the provider authorization page.
+
+> /views/login.ejs
+```ejs
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="/style.min.css" rel="stylesheet">
+    <title>Login page</title>
+</head>
+<body>
+    <div class="flex min-h-screen justify-center items-center login-bg">
+        <div class="bg-white sm:drop-shadow-xl py-11 px-8 rounded w-full sm:w-auto">
+            <h1 class="text-2xl font-bold mb-8">Welcome back</h1>
+            <form method="post" action="/auth/login" class="flex flex-col gap-2 sm:w-96">
+                <a class="social-btn" href="/auth/google">
+                    <img src="/google.svg" alt="Google logo" />
+                    Continue with Google
+                </a>
+                <a class="social-btn" href="/auth/github">
+                    <img src="/github.svg" alt="GitHub logo" />
+                    Continue with Github
+                </a>
+
+                <div class="flex justify-center items-center gap-4 my-4 select-none">
+                    <hr class="border-gray-400 w-full"/>
+                    <span class="text-gray-400">OR</span>
+                    <hr class="border-gray-400 w-full"/>
+                </div>
+
+                <% if (messages.success) { %>
+                    <div class="border border-green-600 bg-green-100 text-green-600 flex items-center my-3 p-3 rounded gap-3">
+                        <%= messages.success %>
+                    </div>
+                <% } %>
+
+                <% if (error) { %>
+                    <div class="error">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M11 11H9V5H11M11 15H9V13H11M10 0C8.68678 0 7.38642 0.258658 6.17317 0.761205C4.95991 1.26375 3.85752 2.00035 2.92893 2.92893C1.05357 4.8043 0 7.34784 0 10C0 12.6522 1.05357 15.1957 2.92893 17.0711C3.85752 17.9997 4.95991 18.7362 6.17317 19.2388C7.38642 19.7413 8.68678 20 10 20C12.6522 20 15.1957 18.9464 17.0711 17.0711C18.9464 15.1957 20 12.6522 20 10C20 8.68678 19.7413 7.38642 19.2388 6.17317C18.7362 4.95991 17.9997 3.85752 17.0711 2.92893C16.1425 2.00035 15.0401 1.26375 13.8268 0.761205C12.6136 0.258658 11.3132 0 10 0Z" fill="#D20F1B"/>
+                        </svg>
+                        <%= error %>
+                    </div>
+                <% } %>
+
+                <div class="flex flex-col">
+                    <label for="email-input" class="text-sm">Email</label>
+                    <input name="email" class="form-element" required type="email" placeholder="Enter email" id="email-input">
+                </div>
+
+                <div class="flex flex-col">
+                    <label for="password-input" class="text-sm">Password</label>
+                    <input name="password" class="form-element" required type="password" placeholder="Enter password" id="password-input">
+                </div>
+
+                <button class="btn" type="submit">Sign In</button>
+
+                <span class="text-center text-gray-600">Don’t have an account?&nbsp;
+                    <a class="font-bold text-gray-800" href="/auth/register">Sign up </a>
+                </span>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+```
+
+> /views/register.ejs
+```ejs
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="/style.min.css" rel="stylesheet">
+    <title>Register</title>
+</head>
+<body>
+<div class="flex min-h-screen justify-center items-center login-bg">
+    <div class="bg-white sm:drop-shadow-xl py-11 px-8 rounded w-full sm:w-auto">
+        <h1 class="text-2xl font-bold mb-8">Create new account</h1>
+        <form method="post" action="/auth/register" class="flex flex-col gap-2 sm:w-96">
+            <a class="social-btn" href="/auth/google">
+                <img src="/google.svg" alt="Google logo" />
+                Continue with Google
+            </a>
+            <a class="social-btn" href="/auth/github">
+                <img src="/github.svg" alt="Google logo" />
+                Continue with Github
+            </a>
+
+            <div class="flex justify-center items-center gap-4 my-4 select-none">
+                <hr class="border-gray-400 w-full"/>
+                <span class="text-gray-400">OR</span>
+                <hr class="border-gray-400 w-full"/>
+            </div>
+
+            <% if (error) { %>
+                <div class="error">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11 11H9V5H11M11 15H9V13H11M10 0C8.68678 0 7.38642 0.258658 6.17317 0.761205C4.95991 1.26375 3.85752 2.00035 2.92893 2.92893C1.05357 4.8043 0 7.34784 0 10C0 12.6522 1.05357 15.1957 2.92893 17.0711C3.85752 17.9997 4.95991 18.7362 6.17317 19.2388C7.38642 19.7413 8.68678 20 10 20C12.6522 20 15.1957 18.9464 17.0711 17.0711C18.9464 15.1957 20 12.6522 20 10C20 8.68678 19.7413 7.38642 19.2388 6.17317C18.7362 4.95991 17.9997 3.85752 17.0711 2.92893C16.1425 2.00035 15.0401 1.26375 13.8268 0.761205C12.6136 0.258658 11.3132 0 10 0Z" fill="#D20F1B"/>
+                    </svg>
+                    <%= error %>
+                </div>
+            <% } %>
+
+            <div class="flex flex-col">
+                <label for="email-input" class="text-sm">Email</label>
+                <input name="email" class="form-element" required type="email" placeholder="Enter email" id="email-input">
+            </div>
+
+            <div class="flex flex-col">
+                <label for="name-input" class="text-sm">Name</label>
+                <input name="name" class="form-element" required type="text" placeholder="Enter name" id="name-input">
+            </div>
+
+            <div class="flex flex-col">
+                <label for="password-input" class="text-sm">Password</label>
+                <input name="password" class="form-element" required type="password" placeholder="Enter password" id="password-input">
+            </div>
+
+            <button class="btn" type="submit">Sign Up</button>
+
+            <span class="text-center text-gray-600">Already have an account?&nbsp;
+                    <a class="font-bold text-gray-800" href="/auth/login">Sign in </a>
+                </span>
+        </form>
+    </div>
+</div>
+</body>
+</html>
+```
+
+> /views/me.ejs
+```ejs
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="/style.min.css" rel="stylesheet">
+    <title>Profile (<%= user.name %>)</title>
+</head>
+<body>
+<div class="flex flex-col gap-5 min-h-screen justify-center items-center">
+    <img class="rounded-full w-40 h-40" alt="avatar" src="<%= user.picture %>" />
+    <h1 class="text-xl font-bold"><%= user.name %></h1>
+
+    <% if (user.accounts.length) { %>
+        <% for (const account of user.accounts) { %>
+            <div class="flex justify-center items-center w-64 gap-2 p-3 border rounded capitalize select-none">
+                <img src="/<%= account.provider %>.svg" alt="<%= account.provider %> logo" />
+                <%= account.provider %>
+            </div>
+        <% } %>
+    <% } else { %>
+        <div class="flex text-gray-600 justify-center items-center w-64 gap-2 p-3 border rounded capitalize select-none">
+            No external auth providers
+        </div>
+    <% } %>
+
+    <a href="/logout" class="btn mt-12">Logout</a>
+</div>
+</body>
+</html>
 ```
 
 ### Register and logout

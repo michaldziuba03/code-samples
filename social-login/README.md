@@ -987,4 +987,6 @@ Thanks for reading this guide, I hope you found it helpful and interesting. Any 
 - [Official GitHub docs about authorizing OAuth apps](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps)
 - [All about Account Takeover (by Harsh Bothra)](https://infosecwriteups.com/all-about-account-takeover-825d8fcf2d57)
 - [Attacking Social Logins: Pre-Authentication Account Takeover (by xcheater)](https://hbothra22.medium.com/attacking-social-logins-pre-authentication-account-takeover-790248cfdc3)
+- [OAuth Misconfiguration Leads To Pre-Account Takeover (by Aswin K V)](https://infosecwriteups.com/oauth-misconfiguration-leads-to-pre-account-takeover-8f94c1ef50be)
 - [Pre-account takeover and Badoo report](https://hackerone.com/reports/1074047)
+- [Social login "SpoofedMe" attack](https://www.eecs.yorku.ca/course_archive/2014-15/W/3482/Team19_presentation.pdf)

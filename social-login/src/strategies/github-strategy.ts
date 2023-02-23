@@ -28,5 +28,9 @@ export const githubStrategy = new Strategy({
         subject: profile.id,
     });
 
+    if (!createdUserId) {
+        return done(new Error('GitHub account cannot be linked'));
+    }
+
     return done(null, { id: createdUserId });
 });

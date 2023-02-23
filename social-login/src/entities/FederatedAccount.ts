@@ -5,9 +5,9 @@ import {
     ManyToOne,
     PrimaryColumn,
     Unique
-} from "typeorm";
-import { User } from "./User";
-import { Providers } from "../types";
+} from 'typeorm';
+import { User } from './User';
+import { Providers } from '../types';
 
 @Entity('federated_accounts')
 @Unique(['provider', 'subject'])

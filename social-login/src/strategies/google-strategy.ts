@@ -1,7 +1,7 @@
-import { Strategy } from "passport-google-oauth20";
-import { findLinkedAccount, linkAccount } from "../link-account";
-import { Providers } from "../types";
-import { getGoogleEmail, getPicture } from "../utils";
+import { Strategy } from 'passport-google-oauth20';
+import { findLinkedAccount, linkAccount } from '../link-account';
+import { Providers } from '../types';
+import { getGoogleEmail, getPicture } from '../utils';
 
 export const googleStrategy = new Strategy({
     clientID: process.env.GOOGLE_CLIENT_ID!,
@@ -25,6 +25,10 @@ export const googleStrategy = new Strategy({
         picture: getPicture(email, profile.photos),
         subject: profile.id,
     });
+
+    if (!createdUserId) {
+        return done(new Error('Google account cannot be linked'));
+    }
 
     return done(null, { id: createdUserId });
 });

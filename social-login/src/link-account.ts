@@ -20,6 +20,14 @@ export async function findLinkedAccount(provider: Providers, subject: string) {
 export async function linkAccount(provider: Providers, options: LinkAccountOptions) {
     const { subject, picture, name, email } = options;
     const user = await userRepository.findOneBy({ email });
+    if (user && !user.isVerified) {
+        /*
+          IMPORTANT: Abort linking account process, to prevent pre-Authentication Account Takeover attack.
+          If user already exists in our database and their email address is unverified, you should disallow social account linking.
+        */
+        return;
+    }
+
     if (user) {
         await federatedAccountRepository.save({
             subject,
@@ -35,6 +43,8 @@ export async function linkAccount(provider: Providers, options: LinkAccountOptio
             name,
             email,
             picture,
+            // as we deny unverified emails from social providers I think we can create user as verified:
+            isVerified: true,
         });
 
         const createdUser = await t.save(newUser);

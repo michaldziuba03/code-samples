@@ -29,23 +29,17 @@ app.get('/me', authenticatedOnly, async (req, res) => {
         relations: { accounts: true },
     });
 
-    return res.render('me', {
-        user,
-    });
+    return res.render('me', { user });
 });
 
 app.get('/auth/login', guestOnly, (req, res) => {
     const errors = req.flash('error') || [];
-    res.render('login', {
-        error: errors[0],
-    });
+    res.render('login', { error: errors[0] });
 });
 
 app.get('/auth/register', guestOnly, (req, res) => {
     const errors = req.flash('error') || [];
-    res.render('register', {
-        error: errors[0],
-    });
+    res.render('register', { error: errors[0] });
 });
 
 app.post('/auth/register', guestOnly, async (req, res) => {
@@ -62,6 +56,12 @@ app.post('/auth/register', guestOnly, async (req, res) => {
        name,
        password: hashedPassword,
        picture: createGravatar(email),
+       /*
+        IMPORTANT: we register users as always verified because we haven't email-verification mechanism.
+        You should always register users with isVerified: false by default, and change it to "true" in email-verification route.
+        Email verification mechanism is out of scope of this guide.
+       */
+       isVerified: true
    });
 
     req.flash('success', 'Now you can login to created account');

@@ -157,7 +157,8 @@ Before we will discuss each social auth implementation method, I want to mention
 The first method is fairly simple. User can use only one authentication method for specific email. That means you cannot link your Google account if you registered with email and password method previously.
 
 #### Relational databases
-![image](https://user-images.githubusercontent.com/43048524/219104514-2b36ebce-b303-4026-b858-1119d5f62919.png)
+![image](https://user-images.githubusercontent.com/43048524/221054002-07000294-0215-453f-a38f-c34657be27bd.png)
+
 > Entity diagram generated with [dbdiagram.io](https://dbdiagram.io/)
 
 #### MongoDB
@@ -167,6 +168,7 @@ For MongoDB schema is the same:
   "_id": <ObjectId>,
   "name": "John Doe",
   "email": "johndoe@gmail.com",
+  "isVerified": true,
   "password": null,
   "provider": "github",
   "providerId": "42580000"
@@ -190,7 +192,8 @@ I will briefly explain this method, because I want to focus actually on second m
 The second method is the most common implementation but is also more complex. User can link multiple authentication providers (connected to the same email address) to a single account.
 
 #### Relational databases
-![image](https://user-images.githubusercontent.com/43048524/219093100-36628861-ea9f-4dc7-bf49-862a1a4275fd.png)
+![image](https://user-images.githubusercontent.com/43048524/221053441-ec972f99-85bd-4c4f-920e-18d7f5b6fb26.png)
+
 > Entity diagram generated with [dbdiagram.io](https://dbdiagram.io/)
 
 #### MongoDB
@@ -200,6 +203,7 @@ MongoDB schema is more flexible and there is no reason to normalize data (you sh
   "_id": <ObjectId>,
   "name": "John Doe",
   "email": "johndoe@gmail.com",
+  "isVerified": true,
   "password": null,
   "googleId": "142984872137006300000",
   "githubId": "42580000"
@@ -211,6 +215,7 @@ MongoDB schema is more flexible and there is no reason to normalize data (you sh
   "_id": <ObjectId>,
   "name": "John Doe",
   "email": "johndoe@gmail.com",
+  "isVerified": true,
   "password": null,
   "accounts": [
     { "provider": "google", "subject": "142984872137006300000" },
@@ -265,7 +270,8 @@ COMMIT; ---> or ROLLBACK; in case of error
 The last featured method is actually extended version of 2nd method. Let's assume you don't want to trust 3rd parties and you prefer to verify emails on your own.
 
 #### Relational databases
-![image](https://user-images.githubusercontent.com/43048524/219873324-49863fc4-624c-44b1-924f-d2b9911ceb13.png)
+![3rd diagram](https://user-images.githubusercontent.com/43048524/221053152-b86e7982-8edf-4861-abca-bc4ac6fbe2a5.png)
+
 > Entity diagram generated with [dbdiagram.io](https://dbdiagram.io/)
 
 #### Example flow

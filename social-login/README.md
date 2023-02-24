@@ -302,6 +302,15 @@ A pre-account takeover is when an attacker creates a user account with local pro
 - lack of email verification mechanism at all OR no checks if the local email address is verified when linking social account.
 - attacker must know victim's email address.
 
+#### Attack steps
+1. Attacker registers new account (in your app) with victim's email address.
+2. After some time victim signs up with social login provider connected to the same email.
+3. Attacker has access to victim's account
+
+#### Fix
+1. Deny unverified accounts to link new social providers.
+2. Inform legitimate user who tries to sign up with social login method.
+
 ### Linking unverified social accounts
 Similar vulnerability to previous one but you’d be attacking from the other direction. Imagine that the victim register in your application with any provider. Attacker can use the victim's email to register new unverified account on another provider's website and sign up in your application with this provider. The application then links the two accounts together based on the matching email address.
 

@@ -142,7 +142,7 @@ We cannot discuss social authentication without mentioning the OAuth 2.0 standar
 - https://oauth.net/2/oauth-best-practice/
 
 ## Social login implementation overview
-Now let's move on to the actual part of the article. We will be talking about the moment when you get the user's profile in the Passport.js strategy callback. During my little research, I have observed at least 3 ways to implement social authentication.
+Now let's move on to the actual part of the article. We will be talking about the moment when you get the user's profile in the Passport.js strategy callback. During my research, I have observed at least 3 ways to implement social authentication.
 
 ### Some universal rules and common gotchas
 Before we will discuss each social auth implementation method, I want to mention a few universal rules that apply to any method:
@@ -151,7 +151,9 @@ Before we will discuss each social auth implementation method, I want to mention
 
 2. Email address from social provider must be verified. It's very important if you want to link new social provider to existing account. Why? Because some bad actor can find out that a particular email is registered in your application and create a new Google (as example) account with that email address. Bad actor can use that unverified Google account to get access to legitimate account from your application.
 
-3. Some providers may not return the email address. In some providers user can register with a phone number. You can simply deny social accounts without email or save phone number (if returned) in email column/field.
+3. You should implement email verification mechanism in your application. It's very important if you want to link new social provider to existing account (registered with email and password). Bad actor can create an account in your application with someone's email address. If after some time the legitimate email owner will sign up with social login, bad actor can access this account. It's called **pre-account takeover** attack. Make sure that **ONLY** verified accounts can link social providers.
+
+4. Some providers may not return the email address. In some providers user can register with a phone number. You can simply deny social accounts without email or save phone number (if returned) in email column/field.
 
 ### First method - user can login with ONLY one provider
 The first method is fairly simple. User can use only one authentication method for specific email. That means you cannot link your Google account if you registered with email and password method previously.
@@ -289,6 +291,16 @@ If it exists you can link new social provider. Now the user can simply use this 
 #### Cons:
 - the most complex featured solution and actually not that easy to implement correctly
 - user must check their email inbox (it hurts the user experience a bit)
+
+## Common security flaws
+In this section we will discuss typical vulnerabilities in social login implementations.
+
+### Pre Account Takeover
+
+
+### Spoofed social account
+As I said before - you should deny unverified emails from social providers.
+
 
 ## Code sample
 Let's implement [second method](#second-method---user-can-login-with-multiple-providers) in TypeScript and Node.js
@@ -1019,3 +1031,5 @@ Thanks for reading this guide, I hope you found it helpful and interesting. Any 
 - [OAuth Misconfiguration Leads To Pre-Account Takeover (by Aswin K V)](https://infosecwriteups.com/oauth-misconfiguration-leads-to-pre-account-takeover-8f94c1ef50be)
 - [Pre-account takeover and Badoo report](https://hackerone.com/reports/1074047)
 - [Social login "SpoofedMe" attack](https://www.eecs.yorku.ca/course_archive/2014-15/W/3482/Team19_presentation.pdf)
+- [Account pre-hijacking](https://en.wikipedia.org/wiki/Account_pre-hijacking)
+- [What is account pre-hijacking (by Elliot Nesbo)](https://www.makeuseof.com/what-is-account-pre-hijacking/)

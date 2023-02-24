@@ -296,11 +296,20 @@ If it exists you can link new social provider. Now the user can simply use this 
 In this section we will discuss typical vulnerabilities in social login implementations.
 
 ### Pre Account Takeover
+A pre-account takeover is when an attacker creates a user account with local provider (email and password) and then the victim sign up with another login method. The application then links the two accounts together based on the matching email address.
+
+#### Attack requirements
+- lack of email verification mechanism at all OR no checks if the local email address is verified when linking social account.
+- attacker must know victim's email address.
 
 
-### Spoofed social account
-As I said before - you should deny unverified emails from social providers.
+### Linking unverified social accounts
+Similar vulnerability to previous one but you’d be attacking from the other direction. As I said before - you should deny unverified emails from social providers.
 
+#### Attack requirements
+- OAuth provider does not require email verification (it's actually very uncommon)
+- no checks if email from social provider is verified.
+- attacker must know victim's email address.
 
 ## Code sample
 Let's implement [second method](#second-method---user-can-login-with-multiple-providers) in TypeScript and Node.js

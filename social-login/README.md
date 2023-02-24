@@ -337,12 +337,16 @@ export class User {
     @Column()
     email: string;
 
+    @Column({ name: 'is_verified', default: false })
+    isVerified: boolean;
+
     @Column({ nullable: true })
     password?: string;
 
     @OneToMany(() => FederatedAccount, account => account.user)
     accounts: FederatedAccount[];
 }
+
 ```
 
 > /entities/FederatedAccount.ts
@@ -355,8 +359,8 @@ import {
     PrimaryColumn,
     Unique
 } from "typeorm";
-import { User } from "./User";
-import { Providers } from "../types";
+import { User } from './User';
+import { Providers } from '../types';
 
 @Entity('federated_accounts')
 @Unique(['provider', 'subject'])
@@ -435,23 +439,17 @@ app.get('/me', authenticatedOnly, async (req, res) => {
         relations: { accounts: true },
     });
 
-    return res.render('me', {
-        user,
-    });
+    return res.render('me', { user });
 });
 
 app.get('/auth/login', guestOnly, (req, res) => {
     const errors = req.flash('error') || [];
-    res.render('login', {
-        error: errors[0],
-    });
+    res.render('login', { error: errors[0] });
 });
 
 app.get('/auth/register', guestOnly, (req, res) => {
     const errors = req.flash('error') || [];
-    res.render('register', {
-        error: errors[0],
-    });
+    res.render('register', { error: errors[0] });
 });
 
 
@@ -665,6 +663,12 @@ app.post('/auth/register', guestOnly, async (req, res) => {
        name,
        password: hashedPassword,
        picture: createGravatar(email),
+       /*
+        IMPORTANT: we register users as always verified because we haven't email-verification mechanism.
+        You should always register users with isVerified: false by default, and change it to "true" in email-verification route.
+        Email verification mechanism is out of scope of this guide.
+       */
+       isVerified: true,
    });
 
     req.flash('success', 'Now you can login to created account');
@@ -879,7 +883,11 @@ export const googleStrategy = new Strategy({
         picture: getPicture(email, profile.photos),
         subject: profile.id,
     });
-
+    
+    if (!createdUserId) {
+        return done(new Error('Google account cannot be linked'));
+    }
+    
     return done(null, { id: createdUserId });
 });
 ```
@@ -915,6 +923,10 @@ export const githubStrategy = new Strategy({
         picture: getPicture(email, profile.photos),
         subject: profile.id,
     });
+    
+    if (!createdUserId) {
+        return done(new Error('GitHub account cannot be linked'));
+    }
 
     return done(null, { id: createdUserId });
 });
@@ -952,6 +964,14 @@ Last operation is running in transaction to avoid data inconsistency in case of 
 export async function linkAccount(provider: Providers, options: LinkAccountOptions) {
     const { subject, picture, name, email } = options;
     const user = await userRepository.findOneBy({ email });
+    if (user && !user.isVerified) {
+        /*
+          IMPORTANT: Abort linking account process, to prevent pre-Authentication Account Takeover attack.
+          If user already exists in our database and their email address is unverified, you should disallow social account linking.
+        */
+        return;
+    }
+
     if (user) {
         await federatedAccountRepository.save({
             subject,
@@ -967,6 +987,8 @@ export async function linkAccount(provider: Providers, options: LinkAccountOptio
             name,
             email,
             picture,
+            // as we deny unverified emails from social providers I think we can create user as verified:
+            isVerified: true,
         });
 
         const createdUser = await t.save(newUser);
@@ -980,6 +1002,7 @@ export async function linkAccount(provider: Providers, options: LinkAccountOptio
         return createdUser.id;
     });
 }
+
 ```
 
 ## Summary

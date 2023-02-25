@@ -3,7 +3,7 @@
 ## Code Samples
 Single place for sample projects from my YouTube videos and articles.
 
-> Any guide DOESN'T pretend to show you best practices. I just want to show my way of doing things.
+> Any of my guides DOESN'T pretend to show you best practices. I just want to show my way of doing things.
 
 ### Goals behind the project
 - I want to give you some tips if you are facing implementation problems with specific feature.

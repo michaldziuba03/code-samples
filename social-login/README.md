@@ -304,7 +304,12 @@ A pre-account takeover is when an attacker creates a user account with local pro
 
 #### Attack steps
 1. Attacker registers new account (in your app) with victim's email address.
+
+<img width="450" alt="pre-account takeover step 1" src="https://user-images.githubusercontent.com/43048524/221334278-5dc80ec6-4e3f-402d-857e-649eb092a36b.png"/>
+
 2. After some time victim signs up with social login provider connected to the same email.
+<img width="500" alt="pre-account takeover step 1" src="https://user-images.githubusercontent.com/43048524/221334470-fab1e934-69e1-4cfa-bd00-8fdeeb77d38b.png"/>
+
 3. Attacker has access to victim's account
 
 #### Fix

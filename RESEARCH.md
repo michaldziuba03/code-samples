@@ -1,2 +1,0 @@
-## My personal research methodology
-

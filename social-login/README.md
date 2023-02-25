@@ -303,18 +303,18 @@ A pre-account takeover is when an attacker creates a user account with local pro
 - attacker must know victim's email address.
 
 #### Attack steps
-1. Attacker registers new account (in your app) with victim's email address.
+1.&nbsp;Attacker registers new account (in your app) with victim's email address.
 
-<img width="450" alt="pre-account takeover step 1" src="https://user-images.githubusercontent.com/43048524/221334278-5dc80ec6-4e3f-402d-857e-649eb092a36b.png"/>
+<img width="450" alt="pre-account takeover step 1" src="https://user-images.githubusercontent.com/43048524/221339034-54d55171-b782-4bd4-a578-a2f94de03aa4.png"/>
 
-2. After some time victim signs up with social login provider connected to the same email.
-<img width="500" alt="pre-account takeover step 1" src="https://user-images.githubusercontent.com/43048524/221334470-fab1e934-69e1-4cfa-bd00-8fdeeb77d38b.png"/>
+2.&nbsp;After some time victim signs up with social login provider connected to the same email.
 
-3. Attacker has access to victim's account
+<img width="500" alt="pre-account takeover step 2" src="https://user-images.githubusercontent.com/43048524/221339078-0938e1d6-4cde-483f-9196-98642d8a232c.png"/>
+
+3.&nbsp;Attacker has access to victim's account
 
 #### Fix
-1. Deny unverified accounts to link new social providers.
-2. Inform legitimate user who tries to sign up with social login method.
+- Deny unverified accounts to link new social providers.
 
 ### Linking unverified social accounts
 Similar vulnerability to previous one but you’d be attacking from the other direction. Imagine that the victim register in your application with any provider. Attacker can use the victim's email to register new unverified account on another provider's website and sign up in your application with this provider. The application then links the two accounts together based on the matching email address.
@@ -323,6 +323,29 @@ Similar vulnerability to previous one but you’d be attacking from the other di
 - OAuth provider does not require email verification (it's actually very uncommon)
 - no checks if email from social provider is verified.
 - attacker must know victim's email address.
+
+#### Attack steps
+1.&nbsp;Victim registers new account in your app (with any available login method)
+
+<img width="500" src="https://user-images.githubusercontent.com/43048524/221338983-02386830-c169-4c69-98e3-424f1e5009cf.png"/>
+
+2.&nbsp;Attacker finds out that victim's email is registered in your application
+
+3.&nbsp;Attacker registers new account in social provider application
+
+<img width="640" src="https://user-images.githubusercontent.com/43048524/221339168-11ec9cb1-4b73-4fa4-8d66-a25cdde1621d.png"/>
+
+> I'm just showing Google as an example - actually Google requires email verification to complete the signup process at all. The same applies for many other OAuth providers.
+
+4.&nbsp;Attacker signs in with social provider using unverified account
+
+<img width="500" src="https://user-images.githubusercontent.com/43048524/221339806-632347ad-560a-4ace-8ab9-d85011109d5e.png"/>
+
+5.&nbsp;Attacker has access to victim's account
+
+#### Fix
+- check if email address from social provider is verified (many OAuth providers gives you information if email is verified)
+- you can implement [3rd method](#third-method---user-can-login-with-multiple-providers-but-needs-to-verify-email-if-account-already-exists) to verify emails from social providers on your own.
 
 ## Code sample
 Let's implement [second method](#second-method---user-can-login-with-multiple-providers) in TypeScript and Node.js

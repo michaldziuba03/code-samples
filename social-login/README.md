@@ -143,10 +143,10 @@ We cannot discuss social authentication without mentioning the OAuth 2.0 standar
 7. Now we can use that profile data to login or register new account in our system.
 
 ### Additional resources about OAuth 2.0
-- https://www.digitalocean.com/community/tutorials/an-introduction-to-oauth-2
-- https://auth0.com/intro-to-iam/what-is-oauth-2
-- https://auth0.com/docs/get-started/authentication-and-authorization-flow/which-oauth-2-0-flow-should-i-use
-- https://oauth.net/2/oauth-best-practice/
+- [An introduction to OAuth 2](https://www.digitalocean.com/community/tutorials/an-introduction-to-oauth-2)
+- [What is OAuth 2](https://auth0.com/intro-to-iam/what-is-oauth-2)
+- [Which OAuth 2.0 flow should I use](https://auth0.com/docs/get-started/authentication-and-authorization-flow/which-oauth-2-0-flow-should-i-use)
+- [OAuth Best practice](https://oauth.net/2/oauth-best-practice/)
 
 ## Social login implementation overview
 Now let's move on to the actual part of the article. We will be talking about the moment when you get the user's profile in the Passport.js strategy callback. During my research, I have observed at least 3 ways to implement social authentication.
@@ -163,7 +163,7 @@ Before we will discuss each social auth implementation method, I want to mention
 4. Some providers may not return the email address. In some providers user can register with a phone number. You can simply deny social accounts without email or save phone number (if returned) in email column/field.
 
 ### First method - user can login with ONLY one provider
-The first method is fairly simple. User can use only one authentication method for specific email. That means you cannot link your Google account if you registered with email and password method previously.
+The first method is fairly simple. User can use only one authentication method for specific email. That means you cannot link your Google account if you registered with Github provider previously.
 
 #### Relational databases
 ![image](https://user-images.githubusercontent.com/43048524/221054002-07000294-0215-453f-a38f-c34657be27bd.png)

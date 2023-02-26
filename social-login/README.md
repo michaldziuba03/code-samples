@@ -66,7 +66,7 @@ npm run dev
       <a href="#oauth-20-standard">OAuth 2.0 standard</a>
       <ul><li><a href="#oauth-20-authorization-code-flow-example">OAuth 2.0 Authorization Code Flow example</a></li></ul>
       <ul><li><a href="#additional-resources-about-oauth-20">Additional resources about OAuth 2.0</a></li></ul>
-    </li>
+    </li>  
     <li>
       <a href="#social-login-implementation-overview">Social login implementation overview</a>
       <ul>
@@ -74,6 +74,13 @@ npm run dev
         <li><a href="#first-method---user-can-login-with-only-one-provider">First method</a></li>
         <li><a href="#second-method---user-can-login-with-multiple-providers">Second method</a></li>
         <li><a href="#third-method---user-can-login-with-multiple-providers-but-needs-to-verify-email-if-account-already-exists">Third method</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#common-security-flaws">Common security flaws</a>
+      <ul>
+        <li><a href="#pre-account-takeover">Pre Account Takeover</a></li>
+        <li><a href="#linking-unverified-social-accounts">Linking unverified social accounts</a></li>
       </ul>
     </li>
     <li>
@@ -149,9 +156,9 @@ Before we will discuss each social auth implementation method, I want to mention
 
 1. Email address is not reliable for existing account lookup - use social account's id instead. In my implementations I use emails only for linking **NEW** social provider to existing account OR creating new account. Why email address from social provider is not reliable? Because in some providers you can **CHANGE** email address and in some implementations I have seen, you will end up with new account in that case :)
 
-2. Email address from social provider must be verified. It's very important if you want to link new social provider to existing account. Why? Because some bad actor can find out that a particular email is registered in your application and create a new Google (as example) account with that email address. Bad actor can use that unverified Google account to get access to legitimate account from your application.
+2. Email address from social provider must be verified. It's very important if you want to link new social provider to existing account. Why? Because some bad actor can find out that a particular email is registered in your application and create a new Google (as example) account with that email address. Bad actor can use that unverified Google account to get access to legitimate account from your application. We will discuss this type of attack in [Linking unverified social accounts](#linking-unverified-social-accounts) section.
 
-3. You should implement email verification mechanism in your application. It's very important if you want to link new social provider to existing account (registered with email and password). Bad actor can create an account in your application with someone's email address. If after some time the legitimate email owner will sign up with social login, bad actor can access this account. It's called **pre-account takeover** attack. Make sure that **ONLY** verified accounts can link social providers.
+3. You should implement email verification mechanism in your application. It's very important if you want to link new social provider to existing account (registered with email and password). Bad actor can create an account in your application with someone's email address. If after some time the legitimate email owner will sign up with social login, bad actor can access this account. We will discuss this type of attack in [Pre Account Takeover](#pre-account-takeover) section. Make sure that **ONLY** verified accounts can link social providers.
 
 4. Some providers may not return the email address. In some providers user can register with a phone number. You can simply deny social accounts without email or save phone number (if returned) in email column/field.
 
@@ -299,7 +306,7 @@ In this section we will discuss typical vulnerabilities in social login implemen
 A pre-account takeover is when an attacker creates a user account with local provider (email and password) using victim's email and after some time the victim signs up with another login method. The application then links the two accounts together based on the matching email address.
 
 #### Attack requirements
-- lack of email verification mechanism at all OR no checks if the local email address is verified when linking social account.
+- no checks if the local email address is verified when linking social account (or lack of email verification mechanism at all).
 - attacker must know victim's email address.
 
 #### Attack steps
@@ -320,7 +327,7 @@ A pre-account takeover is when an attacker creates a user account with local pro
 Similar vulnerability to previous one but you’d be attacking from the other direction. Imagine that the victim register in your application with any provider. Attacker can use the victim's email to register new unverified account on another provider's website and sign up in your application with this provider. The application then links the two accounts together based on the matching email address.
 
 #### Attack requirements
-- OAuth provider does not require email verification (it's actually very uncommon)
+- OAuth provider does not require email verification (it's actually very uncommon).
 - no checks if email from social provider is verified.
 - attacker must know victim's email address.
 
@@ -335,7 +342,7 @@ Similar vulnerability to previous one but you’d be attacking from the other di
 
 <img width="640" src="https://user-images.githubusercontent.com/43048524/221339168-11ec9cb1-4b73-4fa4-8d66-a25cdde1621d.png"/>
 
-> I'm just showing Google as an example - actually Google requires email verification to complete the signup process at all. The same applies for many other OAuth providers.
+> I'm just showing Google as an example - actually Google requires email verification to complete the signup process at all. The same thing applies for many other OAuth providers. I want to make sure you are aware of this type of attack even if your OAuth providers require email address to be verified.
 
 4.&nbsp;Attacker signs in with social provider using unverified account
 
@@ -344,8 +351,9 @@ Similar vulnerability to previous one but you’d be attacking from the other di
 5.&nbsp;Attacker has access to victim's account
 
 #### Fix
-- check if email address from social provider is verified (many OAuth providers gives you information if email is verified)
+- check if email address from social provider is verified (many OAuth providers gives you information if email is verified or not).
 - you can implement [3rd method](#third-method---user-can-login-with-multiple-providers-but-needs-to-verify-email-if-account-already-exists) to verify emails from social providers on your own.
+- most OAuth providers actually refuse to authorize unverified accounts.
 
 ## Code sample
 Let's implement [second method](#second-method---user-can-login-with-multiple-providers) in TypeScript and Node.js
@@ -1071,10 +1079,10 @@ Thanks for reading this guide, I hope you found it helpful and interesting. Any 
 - [Google OAuth2 login without Passport.js video](https://www.youtube.com/watch?v=idqhYcXxbPs)
 - [GitHub OAuth2 login without Passport.js video](https://youtu.be/qUE4-kSlPIk)
 - [Official GitHub docs about authorizing OAuth apps](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps)
-- [All about Account Takeover (by Harsh Bothra)](https://infosecwriteups.com/all-about-account-takeover-825d8fcf2d57)
-- [Attacking Social Logins: Pre-Authentication Account Takeover (by xcheater)](https://hbothra22.medium.com/attacking-social-logins-pre-authentication-account-takeover-790248cfdc3)
-- [OAuth Misconfiguration Leads To Pre-Account Takeover (by Aswin K V)](https://infosecwriteups.com/oauth-misconfiguration-leads-to-pre-account-takeover-8f94c1ef50be)
+- [All about Account Takeover](https://infosecwriteups.com/all-about-account-takeover-825d8fcf2d57)
+- [Attacking Social Logins: Pre-Authentication Account Takeover](https://hbothra22.medium.com/attacking-social-logins-pre-authentication-account-takeover-790248cfdc3)
+- [OAuth Misconfiguration Leads To Pre-Account Takeover](https://infosecwriteups.com/oauth-misconfiguration-leads-to-pre-account-takeover-8f94c1ef50be)
 - [Pre-account takeover and Badoo report](https://hackerone.com/reports/1074047)
 - [Social login "SpoofedMe" attack](https://www.eecs.yorku.ca/course_archive/2014-15/W/3482/Team19_presentation.pdf)
 - [Account pre-hijacking](https://en.wikipedia.org/wiki/Account_pre-hijacking)
-- [What is account pre-hijacking (by Elliot Nesbo)](https://www.makeuseof.com/what-is-account-pre-hijacking/)
+- [What is account pre-hijacking](https://www.makeuseof.com/what-is-account-pre-hijacking/)

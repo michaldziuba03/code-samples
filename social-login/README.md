@@ -125,7 +125,7 @@ Some types are just incorrect. Here is an example: `profile.emails[0].verified` 
 
 <img width="600" src="https://user-images.githubusercontent.com/43048524/218768285-762e287a-18b9-476f-a700-2214d49813ba.png" />
 
-I found that option exists by reading a source code of strategy...
+I found this option exists by reading a source code of strategy...
 
 <img width="600" src="https://user-images.githubusercontent.com/43048524/218771617-8e1a6dcd-a0db-4524-ba3c-87c0dee80be5.png" />
 
@@ -187,7 +187,7 @@ For MongoDB schema is the same:
 #### Example flow
 I will briefly explain this method, because I want to focus actually on second method.
 1. Find user by provider and social account id (providerId).
-2. If user already exists - create session/JWT.
+2. If user already exists - create session/JWT for them.
 3. If user doesn't exists - create new user with data from social provider (email, social account id, displayName). Make sure email is not already taken.
 4. Create session/JWT for created user.
 
@@ -245,28 +245,29 @@ I gonna use SQL statements to explain flow. Imagine you are writing Google strat
   ...
 }
 ```
-1. Check if social account is already linked:
+1. Make sure that email adress from social provider is verified.
+2. Check if social account is already linked:
 ```sql
 SELECT * FROM federated_accounts WHERE provider='google' AND subject='142984872137006300000';
 ```
-2. If federated account found then just authenticate user (create session/JWT) by using `federated_accounts.user_id` field.
-3. If federated account **doesn't** exist, then we have to check if user with the email from social provider exists in database:
+3. If federated account found then just authenticate user (create session/JWT) by using `federated_accounts.user_id` field.
+4. If federated account **doesn't** exist, then we have to check if user with the email from social provider exists in database:
 ```sql
 SELECT * FROM users WHERE email='johndoe@gmail.com';
 ```
-4. If user with that email exists (for example their id is `20`), then just link another social provider, so create federated account with insert:
+5. If user with that email exists (for example their id is `20`) and their email is verified, then just link another social provider, so create federated account with insert:
 ```sql
 INSERT INTO federated_accounts (provider, subject, user_id) VALUES ('google', '142984872137006300000', 20);
 ```
-5. After successful insert you can create session/JWT for a user with id=20.
-6. If user with that email does not exist, create new user and link social provider. I think you should run that query in transaction:
+6. After successful insert you can create session/JWT for a user with id=20.
+7. If user with that email does not exist, create new user and link social provider. I think you should run that query in transaction:
 ```sql
 BEGIN;
   INSERT INTO users (name, email) VALUES ('John Doe', 'johndoe@gmail.com') RETURNING id; ---> id returns 21
   INSERT INTO federated_accounts (provider, subject, user_id) VALUES ('google', '142984872137006300000', 21);
 COMMIT; ---> or ROLLBACK; in case of error
 ```
-7. After successful transaction you can create session/JWT for that created user with id=21.
+8. After successful transaction you can create session/JWT for the created user.
 
 #### Pros:
 - good user experience - their social accounts will be automatically linked to an existing account with the same email address.
@@ -279,7 +280,7 @@ COMMIT; ---> or ROLLBACK; in case of error
 The last featured method is actually extended version of 2nd method. Let's assume you don't want to trust 3rd parties and you prefer to verify emails on your own.
 
 #### Relational databases
-![3rd diagram](https://user-images.githubusercontent.com/43048524/221053152-b86e7982-8edf-4861-abca-bc4ac6fbe2a5.png)
+![3rd diagram](https://user-images.githubusercontent.com/43048524/221438100-b268e4b5-57d9-4c48-bd20-0949f2d3d21c.png)
 
 > Entity diagram generated with [dbdiagram.io](https://dbdiagram.io/)
 
@@ -307,29 +308,29 @@ A pre-account takeover is when an attacker creates a user account with local pro
 
 #### Attack requirements
 - no checks if the local email address is verified when linking social account (or lack of email verification mechanism at all).
-- attacker must know victim's email address.
+- attacker must know the victim's email address.
 
 #### Attack steps
 1.&nbsp;Attacker registers new account (in your app) with victim's email address.
 
-<img width="450" alt="pre-account takeover step 1" src="https://user-images.githubusercontent.com/43048524/221339034-54d55171-b782-4bd4-a578-a2f94de03aa4.png"/>
+<img width="450" src="https://user-images.githubusercontent.com/43048524/221339034-54d55171-b782-4bd4-a578-a2f94de03aa4.png"/>
 
 2.&nbsp;After some time victim signs up with social login provider connected to the same email.
 
-<img width="500" alt="pre-account takeover step 2" src="https://user-images.githubusercontent.com/43048524/221339078-0938e1d6-4cde-483f-9196-98642d8a232c.png"/>
+<img width="500" src="https://user-images.githubusercontent.com/43048524/221339078-0938e1d6-4cde-483f-9196-98642d8a232c.png"/>
 
-3.&nbsp;Attacker has access to victim's account
+3.&nbsp;Attacker has access to the victim's account
 
 #### Fix
-- Deny unverified accounts to link new social providers.
+- Deny unverified accounts from **your** application to link new social providers.
 
 ### Linking unverified social accounts
-Similar vulnerability to previous one but you’d be attacking from the other direction. Imagine that the victim register in your application with any provider. Attacker can use the victim's email to register new unverified account on another provider's website and sign up in your application with this provider. The application then links the two accounts together based on the matching email address.
+Similar vulnerability to previous one but you’d be attacking from the other direction. Imagine that the victim register in your application with some provider. Attacker can use the victim's email to register new unverified account on another provider's website and sign up in your application with this provider. The application then links the two accounts together based on the matching email address.
 
 #### Attack requirements
 - OAuth provider does not require email verification (it's actually very uncommon).
 - no checks if email from social provider is verified.
-- attacker must know victim's email address.
+- attacker must know the victim's email address.
 
 #### Attack steps
 1.&nbsp;Victim registers new account in your app (with any available login method)
@@ -342,13 +343,13 @@ Similar vulnerability to previous one but you’d be attacking from the other di
 
 <img width="640" src="https://user-images.githubusercontent.com/43048524/221339168-11ec9cb1-4b73-4fa4-8d66-a25cdde1621d.png"/>
 
-> I'm just showing Google as an example - actually Google requires email verification to complete the signup process at all. The same thing applies for many other OAuth providers. I want to make sure you are aware of this type of attack even if your OAuth providers require email address to be verified.
+> I'm just showing Google as an example but with Google this attack is impossible - actually Google requires email verification to complete the signup process at all. The same thing applies for many other OAuth providers. I want to make sure you are aware of this type of attack even if your OAuth providers require email address to be verified.
 
 4.&nbsp;Attacker signs in with social provider using unverified account
 
 <img width="500" src="https://user-images.githubusercontent.com/43048524/221339806-632347ad-560a-4ace-8ab9-d85011109d5e.png"/>
 
-5.&nbsp;Attacker has access to victim's account
+5.&nbsp;Attacker has access to the victim's account
 
 #### Fix
 - check if email address from social provider is verified (many OAuth providers gives you information if email is verified or not).
@@ -446,7 +447,7 @@ export class FederatedAccount {
 ```
 
 ### Express.js and middlewares setup
-Let's create two simple guard middlewares. We want `/login` and `/register` pages to be available only for guests (unauthenticated users) and `/me` page to be available only for authenticated users. 
+Let's create two simple guard middlewares. We want page like `/login` and `/register` to be available only for guests (unauthenticated users) and `/me` page to be available only for authenticated users. 
 
 > /setup/middlewares.ts
 ```ts
@@ -470,7 +471,7 @@ export function guestOnly(req: Request, res: Response, next: NextFunction) {
 
 ```
 
-In `server.ts` I configure Express.js and simply add request handlers for rendering pages like login, register. In profile page `/me` I query database for the currently authenticated user with all connected social accounts.
+In `server.ts` I configure Express.js and simply add request handlers for rendering pages. In profile page `/me` I query database for the currently authenticated user with their all connected social accounts.
 > /server.ts
 ```ts
 import 'reflect-metadata';
@@ -1020,7 +1021,7 @@ export async function findLinkedAccount(provider: Providers, subject: string) {
 }
 ```
 
-In the `linkAccount` function, we simply search user by email from social provider, if user with that email already exists - we just create new federated account entry linked to existing user. If user does not exist - we register new user and create federated account linked to the created user. 
+In the `linkAccount` function, we simply search user by email from social provider, if user with that email already exists - we just create new federated account linked to the existing user. If user does not exist - we register new user and create federated account linked to the created user. 
 
 Last operation is running in transaction to avoid data inconsistency in case of failure.
 

@@ -60,6 +60,7 @@ npm run dev
       <ul>
         <li><a href="#strategies-graveyard">Strategies graveyard</a></li>
         <li><a href="#typescript-problems">TypeScript problems</a></li>
+        <li><a href="#is-passportjs-so-bad">Is Passport.js so bad?</a></li>
       </ul>
     </li>
     <li>
@@ -113,7 +114,7 @@ I have seen many tutorials and articles about social login in Node.js, and most 
 Let's talk about the most popular auth middleware for Node.js - PassportJS. I found using this library in a modern TypeScript stack to be a pain for me. PassportJS just feels a little bit outdated.
 
 ### Strategies graveyard
-What scares me the most in PassportJS? The development activity. According to the official website, Passport.js contains over 500 strategies and some of them, even **official** strategies like `passport-github` are just [kinda broken](https://github.com/jaredhanson/passport-github/issues/75). For that reason I use `passport-github2` in the code sample.
+What scares me the most in PassportJS? The development activity of strategies (core library is doing fine). According to the official website, Passport.js contains over 500 strategies and some of them, even **official** strategies like `passport-github` are just [kinda broken](https://github.com/jaredhanson/passport-github/issues/75). For that reason I use `passport-github2` in the code sample.
 
 
 <p align="center">
@@ -129,6 +130,8 @@ I found this option exists by reading a source code of strategy...
 
 <img width="600" src="https://user-images.githubusercontent.com/43048524/218771617-8e1a6dcd-a0db-4524-ba3c-87c0dee80be5.png" />
 
+### Is Passport.js so bad?
+Personally, I don't like Passport.js as it is. Frameworks like Nest.js often provides some sort of wrapper for Passport.js which makes it less painful with TypeScript. I also maintain my own strategies for my side projects. They are properly typed because they are written from scratch in TypeScript. All these things together give me a decent experience.
 
 ## OAuth 2.0 standard
 We cannot discuss social authentication without mentioning the OAuth 2.0 standard. This standard is the basis of most Passport.js strategies, so I think it's important to understand at least the data flow. Most Passport.js strategies use `Authorization Code Flow`, because this flow is suited for a regular server applications.

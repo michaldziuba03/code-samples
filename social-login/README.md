@@ -157,7 +157,7 @@ Now let's move on to the actual part of the article. We will be talking about th
 ### Some universal rules and common gotchas
 Before we will discuss each social auth implementation method, I want to mention a few universal rules that apply to any method:
 
-1. Email address is not reliable for existing account lookup - use social account's id instead. In my implementations I use emails only for linking **NEW** social provider to existing account OR creating new account. Why email address from social provider is not reliable? Because in some providers you can **CHANGE** email address and in some implementations I have seen, you will end up with new account in that case :)
+1. Email address is not reliable for existing account lookup - use social account's id instead. In my implementations I use emails only for linking **NEW** social provider to existing account OR creating new account. Why email address from social provider is not reliable? Because in some providers you can **CHANGE** email address and in many implementations I've seen, you will end up with new account in that case :)
 
 2. Email address from social provider must be verified. It's very important if you want to link new social provider to existing account. Why? Because some bad actor can find out that a particular email is registered in your application and create a new Google (as example) account with that email address. Bad actor can use that unverified Google account to get access to legitimate account from your application. We will discuss this type of attack in [Linking unverified social accounts](#linking-unverified-social-accounts) section.
 
@@ -172,20 +172,6 @@ The first method is fairly simple. User can use only one authentication method f
 ![image](https://user-images.githubusercontent.com/43048524/221054002-07000294-0215-453f-a38f-c34657be27bd.png)
 
 > Entity diagram generated with [dbdiagram.io](https://dbdiagram.io/)
-
-#### MongoDB
-For MongoDB schema is the same:
-```json
-{
-  "_id": <ObjectId>,
-  "name": "John Doe",
-  "email": "johndoe@gmail.com",
-  "isVerified": true,
-  "password": null,
-  "provider": "github",
-  "providerId": "42580000"
-}
-```
 
 #### Example flow
 I will briefly explain this method, because I want to focus actually on second method.
@@ -386,7 +372,6 @@ export async function startDatabase() {
 }
 ```
 
-I extended `User` entity with `picture` column. 
 > /entities/User.ts
 ```ts
 import { Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from 'typeorm';

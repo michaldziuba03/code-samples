@@ -224,7 +224,7 @@ MongoDB schema is more flexible and there is no reason to normalize data (you sh
 > This schema is more generic and you can use the same query for each social auth provider. I think you can create unique compound index for `accounts.provider` and `accounts.subject`.
 
 #### Example flow
-I gonna use SQL statements to explain flow. Imagine you are writing Google strategy verification callback and you got object like that:
+I gonna use SQL statements to explain flow. Imagine you are writing Google strategy verification callback and you got object like this:
 ```js
 {
   provider: 'google',
@@ -276,10 +276,10 @@ The last featured method is actually extended version of 2nd method. Let's assum
 #### Example flow
 Flow is actually very similar to second method. The only difference is how you create `federated_accounts` entry. You actually create new federated account (link social provider) after email verification.
 
-So if user tries to link new social provider to existing account - you generate random unique token, save entry with user's data in `staged_accounts` and send email to the user. For better security you can hash that verification token with `sha256` before inserting to database, however to the verification link you put the plain token. Don't forget about adding expiration time checks to the `staged_accounts`.
+So if user tries to link new social provider to existing account - you generate random unique token, save entry with user's data in `staged_accounts` and send email to the user. For better security you can hash that verification token with `sha256` before inserting to database, however to the verification link you put the plain token. Don't forget about adding expiration time checks.
 
-When user clicks verification link -  you hash plain token from link and check if staged account with that token already exists in database.
-If it exists you can link new social provider. Now the user can simply use this social provider to log into their account.
+When user clicks verification link -  you hash the plain token from link and check if staged account with that token already exists in database.
+If it exists and hasn't expired you can link new social provider. Now the user can simply use this social provider to log into their account.
 
 #### Pros:
 - balanced user experience and security - their social accounts will be automatically linked to existing account with the same email BUT they have to verify email
@@ -806,7 +806,7 @@ export function setupPassport(app: Express) {
 ```
 
 ### Local login strategy
-In the local strategy, I just query the database for the user by email. If the password is undefined, it means the they use a social authentication provider, otherwise I can verify the password and create a session for the user.
+In the local strategy, I just query the database for the user by email. If the password is undefined, it means they are using a social authentication provider, otherwise I can verify the password and create a session for the user.
 
 > /strategies/local-strategy.ts
 ```ts

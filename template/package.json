@@ -1,7 +1,8 @@
 {
-  "name": "social-login",
+  "name": "feature-name",
   "version": "1.0.0",
-  "main": "dist/main.js",
+  "description": "",
+  "main": "index.js",
   "scripts": {
     "build": "tsc",
     "css:watch": "tailwindcss -i ./public/tailwind.css -o ./public/style.min.css --watch --minify",
@@ -9,46 +10,24 @@
     "dev": "ts-node-dev src/server.ts",
     "test": "jest"
   },
-  "keywords": [
-    "tutorial",
-    "auth",
-    "social-auth",
-    "passport",
-    "node",
-    "javascript",
-    "typescript",
-    "sqlite"
-  ],
-  "author": "Michał Dziuba",
-  "license": "MIT",
   "dependencies": {
-    "argon2": "^0.30.3",
     "dotenv": "^16.0.3",
     "ejs": "^3.1.8",
     "express": "^4.18.2",
-    "express-flash": "^0.0.2",
-    "express-session": "^1.17.3",
-    "passport": "^0.6.0",
-    "passport-github2": "^0.1.12",
-    "passport-google-oauth20": "^2.0.0",
-    "passport-local": "^1.0.0",
     "reflect-metadata": "^0.1.13",
     "sqlite3": "^5.1.4",
     "typeorm": "^0.3.12"
   },
   "devDependencies": {
     "@types/express": "^4.17.16",
-    "@types/express-flash": "^0.0.2",
-    "@types/express-session": "^1.17.5",
     "@types/node": "^18.11.18",
-    "@types/passport": "^1.0.11",
-    "@types/passport-github2": "^1.2.5",
-    "@types/passport-google-oauth20": "^2.0.11",
-    "@types/passport-local": "^1.0.35",
     "autoprefixer": "^10.4.13",
     "postcss": "^8.4.21",
     "tailwindcss": "^3.2.7",
     "ts-node-dev": "^2.0.0",
     "typescript": "^4.9.4"
-  }
+  },
+  "keywords": ["guide", "tutorial"],
+  "author": "Michał Dziuba",
+  "license": "MIT"
 }

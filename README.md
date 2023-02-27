@@ -41,3 +41,6 @@ I really want to make each code sample as easy to run as possible, so most sampl
 ### Guides
 - [x] [Social login in Node.js](https://github.com/michaldziuba03/code-samples/tree/main/social-login)
 - [ ] [Reset password in Node.js]()
+
+### License
+Each code sample is distributed under the MIT license. See LICENSE for more information.

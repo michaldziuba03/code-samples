@@ -2,6 +2,8 @@ import 'reflect-metadata';
 import { config } from 'dotenv';
 config();
 import express from 'express';
+import session from 'express-session';
+import flash from 'express-flash';
 import { resetTokenRepository, sampleDataSource, startDatabase, userRepository } from './setup/db';
 import { randomBytes, createHash } from 'crypto';
 import argon2 from 'argon2';
@@ -9,6 +11,7 @@ import { User } from './entities/User';
 import { ResetToken } from './entities/ResetToken';
 import { MoreThanOrEqual } from 'typeorm';
 import { sendResetEmail } from './mail';
+import { throttleResetPassword } from './throttler';
 
 startDatabase();
 const app = express();
@@ -16,6 +19,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
+app.use(flash());
+app.use(session({
+    name: 'sid',
+    secret: 'supersecret',
+    resave: false,
+    saveUninitialized: false,
+}));
 
 app.get('/', (req, res) => {
     return res.redirect('/login');
@@ -28,6 +38,13 @@ app.get('/reset/request', (req, res) => {
 const TWENTY_MINUTES = 20 * 60 * 1000;
 app.post('/reset/request', async (req, res) => {
     const { email } = req.body;
+    
+    const isBlocked = await throttleResetPassword(email);
+    if (isBlocked) {
+        req.flash('err', 'Too many reset password requests');
+        return res.redirect('/reset/request');
+    }
+
     const user = await userRepository.findOneBy({ email });
     if (user) {
         const token = randomBytes(64).toString('hex');
@@ -92,7 +109,8 @@ app.post('/register', async (req, res) => {
     } });
 
     if (userExists) {
-        return res.json({ error: 'User already exists' });
+        req.flash('err', 'User already exists');
+        return res.redirect('/register');
     }
 
     const hashedPassword = await argon2.hash(password);
@@ -103,7 +121,8 @@ app.post('/register', async (req, res) => {
         password: hashedPassword,
     });
 
-    return res.json(user);
+    req.flash('success', 'Now you can login to created account');
+    return res.redirect('/login');
 });
 
 app.get('/login', (req, res) => {
@@ -115,16 +134,19 @@ app.post('/login', async (req, res) => {
 
     const user = await userRepository.findOneBy({ email });
     if(!user) {
-        return res.json({ error: 'Invalid email or password' });
+        req.flash('err', 'Invalid email or password');
+        return res.redirect('/login');
     }
 
 
     const isMatching = await argon2.verify(user.password, password);
     if (!isMatching) {
-        return res.json({ error: 'Invalid email or password' });
+        req.flash('err', 'Invalid email or password');
+        return res.redirect('/login');
     }
 
-    return res.json(user);
+    req.flash('success', 'Valid email and password :)');
+    return res.redirect('/login');
 });
 
 

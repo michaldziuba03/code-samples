@@ -11,6 +11,13 @@
 <body class="flex items-center justify-center min-h-screen">
     <form method="post" action="/register" class="flex flex-col gap-4 w-80">
         <h2 class="font-bold text-2xl mb-4">Register</h2>
+
+        <% if (messages.err) { %>
+            <div class="border text-sm border-red-600 bg-red-100 text-red-600 flex items-center my-3 p-3 rounded gap-3">
+                <%= messages.err %>
+            </div>
+        <% } %>
+
         <div class="w-full">
             <label class="text-gray-700 text-xs font-medium" for="email">Email</label>
             <input name="email" class="input" id="email" type="email" required>

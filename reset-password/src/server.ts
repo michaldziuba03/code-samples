@@ -2,7 +2,13 @@ import 'reflect-metadata';
 import { config } from 'dotenv';
 config();
 import express from 'express';
-import { startDatabase } from './setup/db';
+import { resetTokenRepository, sampleDataSource, startDatabase, userRepository } from './setup/db';
+import { randomBytes, createHash } from 'crypto';
+import argon2 from 'argon2';
+import { User } from './entities/User';
+import { ResetToken } from './entities/ResetToken';
+import { MoreThanOrEqual } from 'typeorm';
+import { sendResetEmail } from './mail';
 
 startDatabase();
 const app = express();
@@ -12,8 +18,115 @@ app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
 app.get('/', (req, res) => {
-    return res.render('index', { message: 'Hello world' });
+    return res.redirect('/login');
 });
+
+app.get('/reset/request', (req, res) => {
+    return res.render('reset-request');
+});
+
+const TWENTY_MINUTES = 20 * 60 * 1000;
+app.post('/reset/request', async (req, res) => {
+    const { email } = req.body;
+    const user = await userRepository.findOneBy({ email });
+    if (user) {
+        const token = randomBytes(64).toString('hex');
+        const tokenHash = createHash('sha256').update(token).digest('hex');
+
+        await resetTokenRepository.save({
+            token: tokenHash,
+            userId: user.id,
+            tokenExpiry: Date.now() + TWENTY_MINUTES,
+        });
+
+        sendResetEmail(user.email, token);
+    }
+
+    // show successful message even if user doesn't exist
+    return res.render('sent', { email });
+});
+
+app.get('/reset/:token', (req, res) => {
+    return res.render('reset', {
+        token: req.params.token,
+    });
+});
+
+app.post('/reset', async (req, res) => {
+    const { token, password } = req.body;
+    const tokenHash = createHash('sha256').update(token).digest('hex');
+
+    const resetToken = await resetTokenRepository.findOneBy({ 
+        token: tokenHash,
+        tokenExpiry: MoreThanOrEqual(Date.now()),
+     });
+
+    if (!resetToken) {
+        return res.render('error');
+    }
+
+    const hashedPassword = await argon2.hash(password);
+    
+    await sampleDataSource.transaction(async t => {
+        await t.update(
+            User, 
+            { id: resetToken.userId }, 
+            { password: hashedPassword },
+        );
+
+        await t.delete(ResetToken, { userId: resetToken.userId });
+    })
+
+    return res.render('success');
+});
+
+app.get('/register', (req, res) => {
+    res.render('register');
+});
+
+app.post('/register', async (req, res) => {
+    const { email, name, password } = req.body;
+
+    const userExists = await userRepository.exist({ where: {
+        email,
+    } });
+
+    if (userExists) {
+        return res.json({ error: 'User already exists' });
+    }
+
+    const hashedPassword = await argon2.hash(password);
+
+    const user = await userRepository.save({
+        email,
+        name,
+        password: hashedPassword,
+    });
+
+    return res.json(user);
+});
+
+app.get('/login', (req, res) => {
+    res.render('login');
+});
+
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    const user = await userRepository.findOneBy({ email });
+    if(!user) {
+        return res.json({ error: 'Invalid email or password' });
+    }
+
+
+    const isMatching = await argon2.verify(user.password, password);
+    if (!isMatching) {
+        return res.json({ error: 'Invalid email or password' });
+    }
+
+    return res.json(user);
+});
+
 
 app.listen(3000, () => {
     console.log('Server started');

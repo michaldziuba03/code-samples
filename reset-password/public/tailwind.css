@@ -6,3 +6,11 @@
 
 /*noinspection CssInvalidAtRule*/
 @tailwind utilities;
+
+.input {
+    @apply px-3 py-2 border border-gray-400 rounded-sm w-full;
+}
+
+.btn {
+    @apply px-3 py-2 border font-medium bg-blue-700 hover:bg-blue-800 transition-colors text-white rounded-sm;
+}

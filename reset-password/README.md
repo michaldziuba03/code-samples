@@ -19,6 +19,17 @@ Install dependencies with npm:
 npm install
 ```
 
+Create .env file and replace sample values with your own credentials:
+```yml
+SMTP_HOST='localhost'
+SMTP_PORT=587
+SMTP_USER='user'
+SMTP_PASS='password'
+
+URL='http://localhost:3000'
+```
+> For email testing you can use services like [Ethereal Email](https://ethereal.email) or [Mailtrap](https://mailtrap.io)
+
 Now you can run application:
 ```
 npm run dev

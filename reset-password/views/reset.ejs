@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="/style.min.css" rel="stylesheet">
+    <title>Reset password - Sample</title>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+    <form method="post" action="/reset" class="flex flex-col gap-4 w-80">
+        <h2 class="font-bold text-2xl mb-4">Reset password</h2>
+
+        <div class="w-full">
+            <label class="text-gray-700 text-xs font-medium" for="pass">New password</label>
+            <input name="password" class="input" id="pass" type="password" required>
+            <input name="token" value="<%= token %>" type="hidden">
+        </div>
+        
+        <button class="btn mt-2">Reset password</button>
+    </form>
+</body>
+</html>

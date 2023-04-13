@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="/style.min.css" rel="stylesheet">
+    <title>Login - Sample</title>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+    <form method="post" action="/login" class="flex flex-col gap-4 w-80">
+        <h2 class="font-bold text-2xl mb-4">Login</h2>
+        <div class="w-full">
+            <label class="text-gray-700 text-xs font-medium" for="email">Email</label>
+            <input name="email" class="input" id="email" type="email" required>
+        </div>
+        <div>
+            <label class="text-gray-700 text-xs font-medium" for="pass">Password</label>
+            <input name="password" class="input" id="pass" type="password" required>
+            <div class="flex justify-end mt-2">
+                <a class="text-xs font-medium text-blue-400 hover:text-blue-500" href="/reset/request">Forgot password</a>
+            </div>
+        </div>
+        
+        <button class="btn mt-2">Sign In</button>
+
+        <span class="text-center text-sm text-gray-600 mt-2">Don’t have an account?&nbsp;
+            <a class="font-bold text-gray-800 hover:text-blue-500" href="/register">Sign Up </a>
+        </span>
+    </form>
+</body>
+</html>

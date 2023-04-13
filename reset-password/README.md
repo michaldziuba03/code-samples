@@ -34,3 +34,21 @@ Now you can run application:
 ```
 npm run dev
 ```
+
+## Screenshots
+> Login page
+
+![image](https://user-images.githubusercontent.com/43048524/231877100-541542ea-fb3e-4153-82f8-d926f4f4d30e.png)
+
+> Forgot password request page
+
+![image](https://user-images.githubusercontent.com/43048524/231877005-5a459011-4cbb-4f28-9943-5d4b0b4bafff.png)
+
+>  Reset link sent page
+
+![image](https://user-images.githubusercontent.com/43048524/231877326-25ee172d-3fae-48ef-97af-4b6db07343e6.png)
+
+> Email message with reset link
+
+![image](https://user-images.githubusercontent.com/43048524/231877555-636900ae-8d8b-4e0d-b6af-66534bb6208e.png)
+

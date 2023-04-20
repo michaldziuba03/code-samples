@@ -8,6 +8,8 @@ export const githubStrategy = new Strategy({
     clientSecret: process.env.GITHUB_CLIENT_SECRET!,
     callbackURL: '/auth/github/callback',
     scope: ['user:email'],
+    // @ts-ignore: for some reason is string type required
+    state: true,
     // @ts-ignore:
     allRawEmails: true,
 }, async (_accessToken, _refreshToken, profile: Profile, done) => {

@@ -22,6 +22,14 @@ app.get('/', (req, res) => {
     res.redirect('/me');
 });
 
+/* 
+  Use this endpoint to see how Passport.js handles state parameter with OAuth2 and express-session.
+  In real app you shouldn't expose endpoint like this.    
+*/
+app.get('/session', (req, res) => {
+    res.json(req.session);
+});
+
 app.get('/me', authenticatedOnly, async (req, res) => {
     const user = await userRepository.findOne({
         where: { id: req.user!.id },
@@ -58,8 +66,12 @@ app.post('/auth/register', guestOnly, async (req, res) => {
        picture: createGravatar(email),
        /*
         IMPORTANT: we register users as always verified because we haven't email-verification mechanism.
-        You should always register users with isVerified: false by default, and change it to "true" in email-verification route.
-        Email verification mechanism is out of scope of this guide.
+        Email verification mechanism is out of scope of this guide, but it's important part of secure app.
+        
+        You should require email verification to even finish the registration process (to make Classic-Federated Merge Attack harder).
+        You should revoke all active user's sessions after successful password reset (to prevent Unexpired Session Identifier Attack).
+
+        Reference: https://msrc.microsoft.com/blog/2022/05/pre-hijacking-attacks/
        */
        isVerified: true
    });

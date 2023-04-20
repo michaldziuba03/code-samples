@@ -16,7 +16,7 @@
 }
 
 .form-element {
-    @apply p-3 border rounded;
+    @apply p-3 border border-gray-400 rounded;
 }
 
 .btn {
@@ -24,7 +24,7 @@
 }
 
 .social-btn {
-    @apply form-element hover:bg-gray-50 flex items-center justify-center gap-3 border-2 border-black select-none;
+    @apply p-3 border rounded hover:bg-gray-50 flex items-center justify-center gap-3 border-2 border-black select-none;
 }
 
 .error {

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual testing client</title>
+</head>
+<body>
+    <div class="file-picker">
+        <input id="file-input" type="file" placeholder="File" />
+    </div>
+
+    <script>
+        const WS_URL = 'ws://localhost:8080';
+
+        function connectToServer() {
+            const ws = new WebSocket(WS_URL);
+            
+            ws.onopen = () => {
+                // message test
+                //ws.send('Hello world2');
+                //ws.send('Hello world');
+                console.log('Connected to server');
+            }
+
+            return ws;
+        }
+
+        function getFileBuffer(callback) {
+            const pickedFile = document.querySelector('#file-input').files[0];
+            if (!pickedFile) {
+                console.log('No file choosen');
+                return;
+            }
+
+            //console.log('Picked file:', pickedFile);
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                console.log('File loaded:', pickedFile.name);
+                const buff = e.target.result;
+                console.log(buff);
+                callback(buff);
+            }
+
+            reader.readAsArrayBuffer(pickedFile);
+        }
+    </script>
+</body>
+</html>

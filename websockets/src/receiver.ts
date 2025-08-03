@@ -48,7 +48,6 @@ export class WsReceiver extends Writable {
     this.opcode = 0;
     this.payloadLen = 0;
     this.maskingKey = Buffer.alloc(0);
-    this.isBinary = false;
 
     this.buf =
       this.remaining() >= 0
@@ -124,6 +123,8 @@ export class WsReceiver extends Writable {
 
     if (this.opcode === WsOpcode.BINARY) {
       this.isBinary = true;
+    } else if (this.opcode === WsOpcode.TEXT) {
+      this.isBinary = false;
     }
 
     // Parse 2nd byte:

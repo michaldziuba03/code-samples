@@ -9,8 +9,6 @@ export enum WsOpcode {
   PONG = 0xa,
 };
 
-type MessageEvent = (data: Buffer, isBinary: true) => void | ((data: string, isBinary: false) => void);
-
 export interface WsEvents {
   'message': [Buffer, true] | [string, false];
   'ping': [];

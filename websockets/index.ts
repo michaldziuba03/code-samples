@@ -1,73 +1,34 @@
-import { createHash } from 'node:crypto';
-import { createServer, ServerResponse } from 'node:http';
-import { WsReceiver } from './receiver';
-import { WsSender } from './sender';
+import { WsServer } from "./server";
 
-function createWsAcceptKey(wsKey: string): string {
-    const uuid = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'; // constant UUID definied in WS docs
-    const dataToHash = wsKey + uuid
+const server = new WsServer();
 
-    return createHash('sha1')
-        .update(Buffer.from(dataToHash))
-        .digest('base64');
-}
-
-function finalizeHandshake(res: ServerResponse, wsAcceptKey: string) {
-    res.statusCode = 101;
-    // set headers:
-    res.setHeader('Upgrade', 'websocket');
-    res.setHeader('Connection', 'Upgrade');
-    res.setHeader('Sec-WebSocket-Accept', wsAcceptKey);
-    
-    res.write('\r\n');
-    res.end();
-}
-
-const server = createServer((req, res) => {
-  console.log('Received request');
-  const wsAcceptKey = req.headers['sec-websocket-key'];
-  if (!wsAcceptKey) {
-    res.statusCode = 400; // Bad Request
-    res.end('WebSocket key not provided\n');
-    return;
-  }
-
-  const acceptKey = createWsAcceptKey(wsAcceptKey);
-  finalizeHandshake(res, acceptKey);
-
-  const socket = req.socket;
-  const sender = new WsSender(socket);
-  const receiver = new WsReceiver();
-
-  sender.sendText('Hello from server!');
-
-  receiver.on('message', (buf, isBinary) => {
+server.on("connection", (ws) => {
+  console.log("New WebSocket connection established");
+  ws.on("message", (data, isBinary) => {
     if (isBinary) {
-      console.log('Received binary message:', buf);
+      console.log("Received binary message:", data);
     } else {
-      console.log('Received text message:', buf.toString('utf-8'));
-      sender.sendText(buf.toString('utf-8'));
+      console.log("Received text message:", data);
+      // Echo the message back
+      ws.send(data);
     }
   });
 
-  receiver.on('ping', (buf) => {
-    console.log('Received PING:', buf);
-    sender.sendPong(buf);
+  ws.on("ping", () => {
+    console.log("Received ping");
   });
 
-  receiver.on('pong', (buf) => {
-    console.log('Received PONG:', buf);
+  ws.on("pong", () => {
+    console.log("Received pong");
   });
 
-  receiver.on('close', (buf: Buffer) => {
-    console.log('Received CLOSE:', buf);
-    sender.sendClose(1000, 'Connection closed by server');
-    socket.end();
+  ws.on("close", () => {
+    console.log("Connection closed");
   });
 
-  socket.pipe(receiver);
+  ws.on("error", (err) => {
+    console.error("WebSocket error:", err);
+  });
 });
 
-server.listen(8080, () => {
-  console.log('Server listening on port 8080');
-});
+server.listen(8080);

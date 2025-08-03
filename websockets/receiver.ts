@@ -224,6 +224,7 @@ export class WsReceiver extends Writable {
       this.handleControlFrame(payload);
     } else {
       this.fragments.push(payload);
+      this.handleFrame();
     }
 
     this.state = WsState.COMPLETE;
@@ -243,12 +244,14 @@ export class WsReceiver extends Writable {
     }
   }
 
-  private onComplete() {
-    if (!this.isControlFrame() && this.fin) {
+  private handleFrame() {
+    if (this.fin) {
       this.emit("message", Buffer.concat(this.fragments), this.isBinary);
       this.fragments = [];
     }
+  }
 
+  private onComplete() {
     this.reset();
 
     if (this.remaining() <= 0) {

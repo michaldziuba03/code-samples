@@ -1,7 +1,6 @@
 import { createHash } from 'node:crypto';
 import { createServer, ServerResponse } from 'node:http';
-import { writeFileSync } from 'node:fs'
-import { WsConnection } from './connection';
+import { WsReceiver } from './receiver';
 
 function createWsAcceptKey(wsKey: string): string {
     const uuid = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'; // constant UUID definied in WS docs
@@ -34,10 +33,14 @@ const server = createServer((req, res) => {
 
   const acceptKey = createWsAcceptKey(wsAcceptKey);
   finalizeHandshake(res, acceptKey);
-  const ws = new WsConnection(req.socket);
-  ws.onData = (data) => {
-    writeFileSync('image.png', data);
-  };
+
+  const socket = req.socket;
+  const receiver = new WsReceiver();
+  receiver.on('message', (buf) => {
+    console.log('Received message:', buf.toString('utf-8'));
+  });
+
+  socket.pipe(receiver);
 });
 
 server.listen(8080, () => {

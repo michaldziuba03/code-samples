@@ -36,8 +36,17 @@ const server = createServer((req, res) => {
 
   const socket = req.socket;
   const receiver = new WsReceiver();
-  receiver.on('message', (buf) => {
-    console.log('Received message:', buf.toString('utf-8'));
+  receiver.on('message', (buf, isBinary) => {
+    if (isBinary) {
+      console.log('Received binary message:', buf);
+    } else {
+      console.log('Received text message:', buf.toString('utf-8'));
+    }
+  });
+
+  receiver.on('close', (buf: Buffer) => {
+    console.log('Received CLOSE frame:', buf.toString('utf-8'));
+    socket.end();
   });
 
   socket.pipe(receiver);

@@ -8,7 +8,16 @@ enum WsState {
   MASKING_KEY,
   PAYLOAD,
   COMPLETE,
-}
+};
+
+enum WsOpcode {
+  CONTINUATION = 0x0,
+  TEXT = 0x1,
+  BINARY = 0x2,
+  CLOSE = 0x8,
+  PING = 0x9,
+  PONG = 0xa,
+};
 
 export class WsReceiver extends Writable {
   private state: WsState = WsState.BASE_HEADER;
@@ -16,9 +25,10 @@ export class WsReceiver extends Writable {
 
   private fin: boolean = false;
   private mask: boolean = false;
-  private opcode: number = 0;
+  private opcode: WsOpcode = 0;
   private payloadLen: number = 0;
   private maskingKey: Buffer = Buffer.alloc(0);
+  private isBinary: boolean = false;
 
   private buf: Buffer = Buffer.alloc(0);
   private offset = 0;
@@ -46,6 +56,7 @@ export class WsReceiver extends Writable {
     this.opcode = 0;
     this.payloadLen = 0;
     this.maskingKey = Buffer.alloc(0);
+    this.isBinary = false;
 
     this.buf =
       this.remaining() >= 0
@@ -58,6 +69,38 @@ export class WsReceiver extends Writable {
 
   private remaining() {
     return this.buf.byteLength - this.offset;
+  }
+
+  private isControlFrame() {
+    return this.opcode >= WsOpcode.CLOSE && this.opcode <= WsOpcode.PONG;
+  }
+  
+  private parse() {
+    while (this.loop) {
+      switch (this.state) {
+        case WsState.BASE_HEADER:
+          this.parseBaseHeader();
+          break;
+        case WsState.EXTENDED_PAYLOAD_LEN_16:
+          this.parsePayloadLength16();
+          break;
+        case WsState.EXTENDED_PAYLOAD_LEN_64:
+          this.parsePayloadLength64();
+          break;
+        case WsState.AFTER_PAYLOAD_LEN:
+          this.afterPayloadLen();
+          break;
+        case WsState.MASKING_KEY:
+          this.parseMaskingKey();
+          break;
+        case WsState.PAYLOAD:
+          this.parsePayload();
+          break;
+        case WsState.COMPLETE:
+          this.onComplete();
+          break;
+      }
+    }
   }
 
   private parseBaseHeader() {
@@ -79,6 +122,17 @@ export class WsReceiver extends Writable {
     }
 
     this.opcode = byte1 & 15;
+    if (this.opcode === WsOpcode.CONTINUATION && this.fragments.length === 0) {
+      throw new Error("Continuation frame cannot be the first frame in a message.");
+    }
+
+    if (this.isControlFrame() && this.fin === false) {
+      throw new Error('FIN must be set for control frames.');
+    }
+
+    if (this.opcode === WsOpcode.BINARY) {
+      this.isBinary = true;
+    }
 
     // Parse 2nd byte:
     const byte2 = this.buf.readUInt8(this.offset);
@@ -90,7 +144,14 @@ export class WsReceiver extends Writable {
     if (payloadLen < 126) {
       this.payloadLen = payloadLen;
       this.state = WsState.AFTER_PAYLOAD_LEN;
-    } else if (payloadLen === 126) {
+      return;
+    }
+    
+    if (this.isControlFrame()) {
+      throw new Error('Control frames cannot have payload length > 125.');
+    }
+
+    if (payloadLen === 126) {
       this.state = WsState.EXTENDED_PAYLOAD_LEN_16;
     } else {
       this.state = WsState.EXTENDED_PAYLOAD_LEN_64;
@@ -118,7 +179,7 @@ export class WsReceiver extends Writable {
     this.offset += 8;
 
     if (len >= Number.MAX_SAFE_INTEGER) {
-      throw new Error("Unsupported websocket frame payload length.");
+      throw new Error("Unsupported frame payload length.");
     }
     this.payloadLen = Number(len);
 
@@ -159,47 +220,39 @@ export class WsReceiver extends Writable {
       }
     }
 
-    this.fragments.push(payload);
+    if (this.isControlFrame()) {
+      this.handleControlFrame(payload);
+    } else {
+      this.fragments.push(payload);
+    }
+
     this.state = WsState.COMPLETE;
   }
 
+  private handleControlFrame(payload: Buffer) {
+    switch (this.opcode) {
+      case WsOpcode.CLOSE:
+        this.emit("close", payload);
+        break;
+      case WsOpcode.PING:
+        this.emit("ping", payload);
+        break;
+      case WsOpcode.PONG:
+        this.emit("pong", payload);
+        break;
+    }
+  }
+
   private onComplete() {
-    if (this.fin) {
-      this.emit("message", Buffer.concat(this.fragments));
+    if (!this.isControlFrame() && this.fin) {
+      this.emit("message", Buffer.concat(this.fragments), this.isBinary);
       this.fragments = [];
     }
+
     this.reset();
 
     if (this.remaining() <= 0) {
       this.loop = false;
-    }
-  }
-
-  private parse() {
-    while (this.loop) {
-      switch (this.state) {
-        case WsState.BASE_HEADER:
-          this.parseBaseHeader();
-          break;
-        case WsState.EXTENDED_PAYLOAD_LEN_16:
-          this.parsePayloadLength16();
-          break;
-        case WsState.EXTENDED_PAYLOAD_LEN_64:
-          this.parsePayloadLength64();
-          break;
-        case WsState.AFTER_PAYLOAD_LEN:
-          this.afterPayloadLen();
-          break;
-        case WsState.MASKING_KEY:
-          this.parseMaskingKey();
-          break;
-        case WsState.PAYLOAD:
-          this.parsePayload();
-          break;
-        case WsState.COMPLETE:
-          this.onComplete();
-          break;
-      }
     }
   }
 }
